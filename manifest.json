@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "Connect Four (JS)",
+  "version": "1.0",
+  "description": "Play Connect Four in a Chrome popup using JS.",
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
