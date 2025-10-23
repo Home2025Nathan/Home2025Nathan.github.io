@@ -15,7 +15,7 @@ html, body {
 	width: 100px;
 	text-align: center;
 	font-size: 80px;
-	margin-left: 1px;
+	margin-left: 20%;
 	cursor: pointer;
 	border-radius: 50%;
 	border: 2px solid black;
@@ -126,5 +126,6 @@ html, body {
 	display: flex
 
 }
+
 
 
