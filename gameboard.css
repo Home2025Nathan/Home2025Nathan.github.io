@@ -1,0 +1,148 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+header {
+	justify-content: center;
+	text-align: center;
+	align-items: center;
+}
+
+ul {
+  list-style-type: none;  
+  margin: 0; 
+  padding: 0; 
+}
+
+li {
+  display: inline-block;
+  padding: 10px;
+}
+
+li button a {
+	font-size: 40px;
+}
+
+#container {
+	text-align: center;
+}
+
+.count {
+	position: absolute;
+	height: 100px;
+	width: 100px;
+	text-align: center;
+	font-size: 80px;
+	margin-left: 30%;
+	cursor: pointer;
+	border-radius: 50%;
+	border: 2px solid black;
+}
+
+.count.yellow {
+	background-color: yellow;
+}
+
+.count.red {
+	background-color: red;
+}
+
+.count.game_over {
+	background-color: transparent;
+	border: 2px solid transparent;
+	height:65px;
+	width: 300px;
+	font-size: 60px;
+	margin-left: 20%;
+}
+
+.count.full {
+	background-color: transparent;
+	height:65px;
+	width: 100px;
+	border: 2px solid transparent;
+	font-size: 60px;
+	margin-left: 20%;	
+}
+
+.column-btn {
+    padding: 17px;
+    padding-top: 8px;
+    padding-bottom: 15px;
+	margin-bottom: 3px;
+    font-family: Georgia, serif;
+    font-size: 25px;  
+	margin-left: 5px;
+	margin-right: 5px;
+}	
+
+#board {
+	display: flex;
+	justify-content: center;
+}
+
+#grid {
+	position: relative;
+	display: grid;
+    grid-template-columns: repeat(7, 61.5px);
+    grid-template-rows: repeat(6, 61.5px);
+	z-index: 1;
+}
+
+.img {
+	position: absolute;
+	width: 444px;
+	height: 382px;
+	margin-left: -6.7px;
+	margin-top: -4.5px;
+	z-index: 0;
+}
+
+#game {
+    display: flex;
+    margin: 10px;
+    justify-content: center;
+}
+
+.start-btn {
+    display: block; 
+    margin: 0 auto; 
+    padding: 40px;
+    font-family: Georgia, serif;
+    font-size: 25px;
+}
+
+
+.startbtn {
+	display: block;
+	margin: 50px auto;
+	padding: 20px;
+    font-family: Georgia, serif;
+    font-size: 22px;
+}
+
+.cell {
+	width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background-color: white;
+	justify-content: center;
+	display: flex;
+	align-items: center;
+	cursor: pointer
+}
+
+.cell.yellow {
+	background-color: yellow;
+}
+
+.cell.red {
+	background-color: red;
+}
+
+.win {
+	display: flex
+}
