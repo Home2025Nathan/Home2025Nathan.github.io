@@ -3,12 +3,14 @@ html, body {
     padding: 0;
     height: 100%;
     width: 100%;
+	background-color: #d6f5ff;
 }
 
 header {
 	justify-content: center;
 	text-align: center;
 	align-items: center;
+	background-color: #bbeeff;
 }
 
 ul {
@@ -24,6 +26,14 @@ li {
 
 li button a {
 	font-size: 40px;
+	text-decoration: none;
+	font-family: Georgia, serif;
+}
+
+button {
+	background-color: white;
+	border: 0;
+	border-radius: 12px;
 }
 
 #container {
@@ -75,8 +85,8 @@ li button a {
 	margin-bottom: 3px;
     font-family: Georgia, serif;
     font-size: 25px;  
-	margin-left: 5px;
-	margin-right: 5px;
+	margin-left: 0.38vw;
+	margin-right: 0.38vw;
 }	
 
 #board {
@@ -90,6 +100,13 @@ li button a {
     grid-template-columns: repeat(7, 61.5px);
     grid-template-rows: repeat(6, 61.5px);
 	z-index: 1;
+}
+
+#dLoad {
+	display: block;
+	margin: 1% auto;
+	padding: 4px;
+	text-decoration: none;
 }
 
 .img {
@@ -118,7 +135,7 @@ li button a {
 
 .startbtn {
 	display: block;
-	margin: 50px auto;
+	margin: 1% auto;
 	padding: 20px;
     font-family: Georgia, serif;
     font-size: 22px;
@@ -129,10 +146,8 @@ li button a {
     height: 55px;
     border-radius: 50%;
     background-color: white;
-	justify-content: center;
 	display: flex;
 	align-items: center;
-	cursor: pointer
 }
 
 .cell.yellow {
@@ -140,6 +155,21 @@ li button a {
 }
 
 .cell.red {
+	background-color: red;
+}
+
+.sCell {
+	width: 42px;
+    height: 42px;
+	border-radius: 50%;
+	box-shadow: inset 5px 5px 3px 1px rgba(0, 0, 0, 0.5), inset -5px 5px 3px 1px rgba(0, 0, 0, 0.5), inset 5px -5px 3px 1px rgba(0, 0, 0, 0.5), inset -5px -5px 3px 1px rgba(0, 0, 0, 0.5);
+}
+
+.sCell.yellow {
+	background-color: yellow;
+}
+
+.sCell.red {
 	background-color: red;
 }
 

@@ -71,22 +71,28 @@ function toggle(cells) {
 }
 
 function board_print() {
-	let cell = document.createElement("div");
+	let cell = document.createElement("div")
+	let sCell = document.createElement("div")
 	cell.classList.add("cell");
+	sCell.classList.add("sCell")
 	if (p === "x") {
-		cell.classList.add("red");
-		cell.style.gridRowStart = row + 1;
-		cell.style.gridColumnStart = pillar + 1;
-		cell.dataset.row = row;
-		cell.dataset.col = pillar;
+		cell.classList.add("red")
+		sCell.classList.add("red")
+		cell.style.gridRowStart = row + 1
+		cell.style.gridColumnStart = pillar + 1
+		cell.dataset.row = row
+		cell.dataset.col = pillar
 		grid.appendChild(cell)
+		cell.appendChild(sCell)
 	} else if (p === "o") {
-		cell.classList.add("yellow");
-		cell.style.gridRowStart = row + 1;
-		cell.style.gridColumnStart = pillar + 1;
-		cell.dataset.row = row;
-		cell.dataset.col = pillar;
+		cell.classList.add("yellow")
+		sCell.classList.add("yellow")
+		cell.style.gridRowStart = row + 1
+		cell.style.gridColumnStart = pillar + 1
+		cell.dataset.row = row
+		cell.dataset.col = pillar
 		grid.appendChild(cell)
+		cell.appendChild(sCell)
 	}
 	if (game_over) { 
         write(`Player ${num} wins`)
