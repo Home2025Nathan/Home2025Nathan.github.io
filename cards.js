@@ -2,48 +2,6 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms*1000));
 }
 
-async function returnElement() {
-    return new Promise(resolve => {
-        function handler() {
-            choice = request.value.trim()
-            request.value = ""
-            submitBtn.removeEventListener("click", handler)
-            window.removeEventListener("keyup", enterHandler)
-            resolve(choice)
-        }
-        
-        function enterHandler(event) {
-            if (event.key === "Enter") {handler()}
-        }
-        
-        submitBtn.addEventListener("click", handler)
-        window.addEventListener("keyup", enterHandler)
-    })
-}
-
-async function ask(allowed) {
-    while (true) {
-        write(`type ${allowed[0]} or ${allowed[1]} and press submit`)
-        choice = (await returnElement()).toLowerCase()
-        if (allowed.includes(choice)) {
-            return choice 
-        }
-        write("invalid input, try again")
-    }
-}
-
-async function bet(col) {
-    while (true) {
-        choice = parseFloat(await returnElement())
-        if (!Number.isNaN(choice)) {
-            return choice
-        }
-        write(" ")
-        write("invalid input, try again")
-        write([1, `${col} chips – $${a}: `])
-    }
-}
-
 let allowed
 let col
 let dealer 
@@ -111,6 +69,49 @@ let cardValue = {
   'King' : 10,
   'Ace' : 11,
 }
+
+async function returnElement() {
+    return new Promise(resolve => {
+        function handler() {
+            choice = request.value.trim()
+            request.value = ""
+            submitBtn.removeEventListener("click", handler)
+            window.removeEventListener("keyup", enterHandler)
+            resolve(choice)
+        }
+        
+        function enterHandler(event) {
+            if (event.key === "Enter") {handler()}
+        }
+        
+        submitBtn.addEventListener("click", handler)
+        window.addEventListener("keyup", enterHandler)
+    })
+}
+
+async function ask(allowed) {
+    while (true) {
+        write(`type ${allowed[0]} or ${allowed[1]} and press submit`)
+        choice = (await returnElement()).toLowerCase()
+        if (allowed.includes(choice)) {
+            return choice 
+        }
+        write("invalid input, try again")
+    }
+}
+
+async function bet(col) {
+    while (true) {
+        choice = parseFloat(await returnElement())
+        if (!Number.isNaN(choice)) {
+            return choice
+        }
+        write(" ")
+        write("invalid input, try again")
+        write([1, `${col} chips – $${a}: `])
+    }
+}
+
 
 function write(msg) {
     msg[0] === 1 ? output.textContent += msg[1] : output.textContent += msg + "\n"

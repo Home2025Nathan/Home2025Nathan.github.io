@@ -3,12 +3,14 @@ html, body {
     padding: 0;
     height: 100%;
     width: 100%;
+	background-color: #d6f5ff;
 }
 
 header {
 	justify-content: center;
 	text-align: center;
 	align-items: center;
+	background-color: #bbeeff;
 }
 
 ul {
@@ -24,6 +26,14 @@ li {
 
 li button a {
 	font-size: 40px;
+	text-decoration: none;
+	font-family: Georgia, serif;
+}
+
+button {
+	background-color: white;
+	border: 0;
+	border-radius: 12px;
 }
 
 #container {
@@ -36,17 +46,9 @@ li button a {
 	align-items: center;
 }
 
-
-#txt {
-	
-	height: 1%;
-	width: 7.75vw;
-	right: 4vw
-}
-
 #submit {
-	right: 4vw;
-	height: 1%;
+	border-radius: 0;
+	font-size: 16px;
 }
 
 
