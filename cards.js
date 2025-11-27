@@ -50,8 +50,10 @@ function full_deck() {
 }
 
 function cards() {
-    let num = Math.floor(Math.random() * deck.length)
-    return deck[num]
+    let num = Math.floor(Math.random() * deck.length);
+    let card = deck[num]
+    deck.splice(num, 1);
+    return card;
 }
 
 let cardValue = {
@@ -79,11 +81,9 @@ async function returnElement() {
             window.removeEventListener("keyup", enterHandler)
             resolve(choice)
         }
-        
         function enterHandler(event) {
             if (event.key === "Enter") {handler()}
         }
-        
         submitBtn.addEventListener("click", handler)
         window.addEventListener("keyup", enterHandler)
     })
