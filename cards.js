@@ -27,7 +27,12 @@ const output = document.getElementById("output")
 const startBtn = document.getElementById("start-btn")
 const box = document.getElementById("container2")
 const request = document.createElement("input")
+request.id = "txt"
+request.type = "text"
+request.placeholder = "Type something here"
 const submitBtn = document.createElement("button")
+submitBtn.id = "submit"
+submitBtn.textContent = "submit"
 const tag = document.createElement("a")
 const quit = document.createElement("button")
 
@@ -199,12 +204,7 @@ async function hit(){
 
 function replay(){
 	gameRunning = false
-    tag.href = "index.html"
-	quit.id = "quit"
-	quit.textContent = "Quit Game"
-    tag.appendChild(quit)
 	document.body.appendChild(tag)
-    
     if (balance > 0) {
         startBtn.style.display = "flex"
     } else {
@@ -213,26 +213,33 @@ function replay(){
     }
 }
 
+function begin() {
+    output.className = "display"
+    startBtn.className = "restart-btn"
+    startBtn.textContent = "play again"
+    quit.id = "quit"
+	quit.textContent = "Quit Game"
+    tag.href = "index.html"
+    tag.appendChild(quit)
+    box.appendChild(request)
+    box.appendChild(submitBtn)
+    startBtn.removeEventListener("click", begin)
+    startBtn.addEventListener("click", start)
+    start()
+}
+
+function set_up() {
+    tag.remove()
+    full_deck()
+	startBtn.style.display = "none"
+    output.textContent = ""
+    output.innerHTML = ""
+}
+
 async function start() {
     if (gameRunning) {return}
     gameRunning = true
-	tag.remove()
-	startBtn.style.display = "none"
-    startBtn.className = "restart-btn"
-    startBtn.textContent = "play again"
-    output.className = "display"
-    request.remove()
-    submitBtn.remove()
-    box.appendChild(request)
-    request.id = "txt"
-    request.type = "text"
-    request.placeholder = "Type something here"
-    box.appendChild(submitBtn)
-    submitBtn.id = "submit"
-	submitBtn.textContent = "submit"
-    output.textContent = ""
-    output.innerHTML = ""
-    full_deck()
+	set_up()
     while (true) {
         write(`Your balance is $${balance}`)
         write("Pick your chips")
@@ -412,4 +419,4 @@ async function start() {
 }
 
 startBtn.className = "start-btn"
-startBtn.addEventListener("click", start)
+startBtn.addEventListener("click", begin)
