@@ -236,6 +236,76 @@ function set_up() {
     output.innerHTML = ""
 }
 
+async function multistart() {
+    full_deck()
+    let dl = [cards(), cards()]
+    let player = [cards(), cards()]
+    let list = []
+    list.push(dl)
+    list.push(player)
+    let dv = cardValue[list[0][0]] + cardValue[list[0][1]]
+    let v1 = cardValue[list[1][0]] + cardValue[list[1][1]]
+    
+    let players = 3
+    for (let i = 1; i <= players; i++) {
+        if (i === 3) {
+            let p2 = []
+            p2.push(cards())
+            p2.push(cards())
+            list.push(p2)
+            
+        }
+        if (i === 4) {
+            let p3 = []
+            p3.push(cards())
+            p3.push(cards())
+            list.push(p3)
+        }
+        if (i === 5) {
+            let p4 = []
+            p4.push(cards())
+            p4.push(cards())
+            list.push(p4)
+        }
+    }
+
+    if (players === 5) {
+        let v2 = cardValue[list[2][0]] + cardValue[list[2][1]]
+        let v3 = cardValue[list[3][0]] + cardValue[list[3][1]]
+        let v4 = cardValue[list[4][0]] + cardValue[list[4][1]]
+
+    }
+    if (players === 4) {
+        let v2 = cardValue[list[2][0]] + cardValue[list[2][1]]
+        let v3 = cardValue[list[3][0]] + cardValue[list[3][1]]
+    }
+    if (players === 3) {
+        let v2 = cardValue[list[2][0]] + cardValue[list[2][1]]
+    } 
+
+
+    for (let i = 1; i <= player; i++) {
+        if (cardValue[list[i][0]] === 8 || cardValue[list[i][0]] === 11 || cardValue[list[i][0]] === 18) {
+            write(`Your first card is an ${list[i][0]}`)
+            await sleep(1)
+        } else {
+            write(`Your first card is a ${list[i][0]}`)
+            await sleep(1)
+        }
+        if (cardValue[list[i][1]] === 8 || cardValue[list[i][1]] === 11 || cardValue[list[i][1]] === 18) {
+            write(`Your second card is an ${list[i][1]}`)
+            await sleep(1)
+        } else {
+            write(`Your second card is a ${list[i][1]}`)
+            await sleep(1)
+        }
+    }
+
+    write(`You have ${v1} points`)
+    await sleep(1)
+    write(" ")
+}
+
 async function start() {
     if (gameRunning) {return}
     gameRunning = true
