@@ -22,6 +22,7 @@ let purple
 let orange
 let gameRunning = false
 let a
+let players
 
 const output = document.getElementById("output")
 const startBtn = document.getElementById("start-btn")
@@ -101,14 +102,14 @@ async function returnElement() {
     })
 }
 
-async function multiask(allowed) {
+async function multiask(allowed, player) {
     while (true) {
-        write(`type ${allowed[0]} or ${allowed[1]} and press submit`)
+        write(`player ${player}, type ${allowed[0]} or ${allowed[1]} and press submit`)
         choice = (await returnElement()).toLowerCase()
         if (allowed.includes(choice)) {
             if (choice === "s") {
                 await sleep(1)
-                multistand(1)
+                multistand(player)
             } else if (choice === "h") {
                 await sleep(1)
                 multihit()
@@ -235,28 +236,60 @@ async function stand() {
 }
 
 async function multistand(player) {
-    write(`Dealer's hand: ${list[0[0]]} and ${list[0][1]}`)
-    await sleep(1)
-    while (dv < 17) {
-        if (cardValue[list[0][1]] === 8 || cardValue[[list[0][1]]] === 11 || cardValue[[list[0][1]]] === 18) {
-            write(`The dealer draws an ${[list[0][1]]}`)
-            await sleep(1)
-        } else {
-            write(`The dealer draws a ${[list[0][1]]}`)
-            await sleep(1)
+    if (player === players){
+        write(`Dealer's hand: ${list[0[0]]} and ${list[0][1]}`)
+        await sleep(1)
+        while (dv < 17) {
+            if (cardValue[list[0][1]] === 8 || cardValue[[list[0][1]]] === 11 || cardValue[[list[0][1]]] === 18) {
+                write(`The dealer draws an ${[list[0][1]]}`)
+                await sleep(1)
+            } else {
+                write(`The dealer draws a ${[list[0][1]]}`)
+                await sleep(1)
+            }
+            dv += cardValue[[list[0][1]]]
+                
+            if (dv > 21 && newCard[list[0][1]] === 'Ace') {
+                dv -= 10
+            }
+            if (dv < 17) {
+                await sleep(1)
+                write(`The Dealer has ${dv} points`)
+            }
         }
-        dv += cardValue[[list[0][1]]]
-            
-        if (dv > 21 && newCard[list[0][1]] === 'Ace') {
-            dv -= 10
-        }
-        if (dv < 17) {
-            await sleep(1)
-            write(`The Dealer has ${dv} points`)
-        }
+    } else {
+        player += 1
+        multihit(player)
     }
     multiwinChecker(player)
     if (player === players){replay()}
+}
+
+async function multihit(player){
+    while (list[player][2] < 21 && choice === "h") {
+        newCard = cards()
+        if (cardValue[newCard] === 8 || cardValue[newCard] === 11 || cardValue[newCard] === 18) {
+            write(`You drew an ${newCard}`)
+        } else {
+            write(`You drew a ${newCard}`)
+        }
+        list[player][2] += cardValue[newCard]
+        if (list[player][2] > 21 && newCard === "Ace") {
+            list[player][2] -= 10 
+        }
+        write(`You have ${list[player][2]} points`) 
+        if (list[player][2] > 21 && player === players) {
+            write("Your hand went over 21")
+            write("You bust")
+            write("You lose")
+            write(`Your balance is now ${list[player][3]}`)
+            multistand(player)
+        } else if (){
+            
+        } else {
+            await multiask(["s", "h"])
+        }
+    }
 }
 
 async function hit(){
@@ -336,7 +369,7 @@ async function multistart() {
     p1.push(v1)
     p1.push(1000)
     
-    let players = 2
+    players = 2
     
     if (players === 2) {
         let p2 = []
@@ -434,7 +467,7 @@ async function multistart() {
                 write(`Your balance is now ${list[i][3]}`)
                 replay()
             }
-            await multiask(["s","h"])
+            await multiask(["s","h"], 1)
         }
     }
 }
