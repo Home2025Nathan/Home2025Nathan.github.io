@@ -80,8 +80,8 @@ let cardValue = {
 
 let values = {
     1 : v1,
-    2 : v2
-    3 : v3
+    2 : v2,
+    3 : v3,
     4 : v4
 }
 
@@ -104,7 +104,7 @@ async function returnElement() {
 
 async function multiask(allowed, player) {
     while (true) {
-        write(`player ${player}, type ${allowed[0]} or ${allowed[1]} and press submit`)
+        write(`player${player}, type ${allowed[0]} or ${allowed[1]} and press submit`)
         choice = (await returnElement()).toLowerCase()
         if (allowed.includes(choice)) {
             if (choice === "s") {
@@ -112,8 +112,8 @@ async function multiask(allowed, player) {
                 multistand(player)
             } else if (choice === "h") {
                 await sleep(1)
-                multihit()
-            }
+                multihit(player)
+            }             
         }
         write("invalid input, try again")
     }
@@ -183,27 +183,29 @@ function winChecker(){
     }
 }
 
-function multiwinChecker(player){
+function multiwinChecker(){
     for (let i = 1; i <= players; i++) {
-        if (dealer > 21) {
-            write(`The dealer has ${dv} points`)
-            write("The dealer's hand is over 21")
-            write("You win")
-            list[player][3] += list[player][4] * 2
-        } else if (dealer >= 17) {
-            if (list[player][2] > dealer) {
-                write(`The Dealer has ${dv} points`)
-                write("You win")
-                list[player][3] += list[player][4] * 2
-            } else if (list[player][2] < dealer) {
-                write(`The Dealer has ${dv} points`)
-                write("You lose")
-            } else if (list[player][2] === dealer) {
-                write(`The Dealer has ${dv} points`)
-                write("You tie")
-                list[player][3] += list[player][4]
+        if (list[i][2] >= 21) {
+            if (dv > 21) {
+                write(`The dealer has ${dv} points`)
+                write("The dealer's hand is over 21")
+                write(`Player${i}, you win!`)
+                list[i][3] += list[i][4] * 2
+            } else if (dv >= 17) {
+                if (list[player][2] > dv) {
+                    write(`The Dealer has ${dv} points`)
+                    write("You win")
+                    list[player][3] += list[player][4] * 2
+                } else if (list[player][2] < dv) {
+                    write(`The Dealer has ${dv} points`)
+                    write("You lose")
+                } else if (list[player][2] === dv) {
+                    write(`The Dealer has ${dv} points`)
+                    write("You tie")
+                    list[player][3] += list[player][4]
+                }
             }
-        }
+        } else
     }
 }
 
@@ -252,17 +254,20 @@ async function multistand(player) {
             if (dv > 21 && newCard[list[0][1]] === 'Ace') {
                 dv -= 10
             }
-            if (dv < 17) {
+            if (dv === 21) {
+                await sleep(1)
+                write(`The Dealer has ${dv} points`)
+                write("He yells BlackJack!")
+            } else if (dv < 17) {
                 await sleep(1)
                 write(`The Dealer has ${dv} points`)
             }
         }
+        multiwinChecker()
     } else {
         player += 1
-        multihit(player)
+        multiask(["s", "h"], player)
     }
-    multiwinChecker(player)
-    if (player === players){replay()}
 }
 
 async function multihit(player){
@@ -284,8 +289,6 @@ async function multihit(player){
             write("You lose")
             write(`Your balance is now ${list[player][3]}`)
             multistand(player)
-        } else if (){
-            
         } else {
             await multiask(["s", "h"])
         }
@@ -440,12 +443,7 @@ async function multistart() {
 
     for (let i = 1; i <= players; i++) {
         if (list[i][2] === 21 && dv != 21) {
-            write("Blackjack!!!!!")
-            write(`The dealer's second card was a ${list[0][1]}`)
-            write("You win")
-            list[i][3] += list[i][4] * 2
-            write(`Your balance is now ${list[i][3]}`)
-            replay()
+            write(`Player${i} has Blackjack!!!!!`)
         } else if (dv === 21 && list[i][2] === 21) {
             write(`The dealer shows that his second card is a ${list[0][1]}`)
             write("Blackjack!!!!!!!!")
@@ -461,11 +459,7 @@ async function multistart() {
                 await sleep(1)
             }
             if (dealer === 21 && list[i][2] != 21) {
-                write("Blackjack!!!!!")
-                write(`The dealer's second card was a ${list[0][1]}`)
-                write("The dealer wins")
-                write(`Your balance is now ${list[i][3]}`)
-                replay()
+                multiwinChecker()
             }
             await multiask(["s","h"], 1)
         }
