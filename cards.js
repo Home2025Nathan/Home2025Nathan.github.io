@@ -102,9 +102,7 @@ async function returnElement() {
 async function multiask(allowed, player) {
     while (true) {
         write(`player${player}, type ${allowed[0]} or ${allowed[1]} and press submit`)
-        choice = (await returnElement()).toLowerCase()
-        write(allowed)
-        write(choice)
+        choice = (await returnElement()).toLowerCase()  
         if (allowed.includes(choice)) {
             if (choice === "s") {
                 await sleep(1)
@@ -195,18 +193,22 @@ function multiwinChecker(){
                 write("The dealer's hand is over 21")
                 write(`Player${i}, you win!`)
                 list[i][3] += list[i][4] * 2
+                write(`Player${i}, your balance is now ${list[i][3]}`)
             } else if (dv >= 17) {
                 if (list[i][2] > dv) {
                     write(`The Dealer has ${dv} points`)
-                    write("You win")
+                    write(`Player${i}, you win`)
                     list[i][3] += list[i][4] * 2
+                    write(`Player${i}, your balance is now ${list[i][3]}`)
                 } else if (list[i][2] < dv) {
                     write(`The Dealer has ${dv} points`)
-                    write("You lose")
+                    write(`Player${i}, you lose`)
+                    write(`Player${i}, your balance is now ${list[i][3]}`)
                 } else if (list[i][2] === dv) {
                     write(`The Dealer has ${dv} points`)
-                    write("You tie")
+                    write(`Player${i}, you tie`)
                     list[i][3] += list[i][4]
+                    write(`Player${i}, your balance is now ${list[i][3]}`)
                 }
             }
         } else {
@@ -245,7 +247,7 @@ async function stand() {
 
 async function multistand(player) {
     if (player === players){
-        write(`Dealer's hand: ${list[0[0]]} and ${list[0][1]}`)
+        write(`Dealer's hand: ${list[0][0]} and ${list[0][1]}`)
         await sleep(1)
         while (dv < 17) {
             if (cardValue[list[0][1]] === 8 || cardValue[[list[0][1]]] === 11 || cardValue[[list[0][1]]] === 18) {
@@ -270,6 +272,7 @@ async function multistand(player) {
             }
         }
         multiwinChecker()
+        replay()
     } else {
         player += 1
         await multiask(["s", "h"], player)
@@ -277,7 +280,7 @@ async function multistand(player) {
 }
 
 async function multihit(player){
-    while (list[player][2] < 21 && choice === "h") {
+    while (list[player][2] <= 21 && choice === "h") {
         newCard = cards()
         if (cardValue[newCard] === 8 || cardValue[newCard] === 11 || cardValue[newCard] === 18) {
             write(`You drew an ${newCard}`)
@@ -294,6 +297,9 @@ async function multihit(player){
             write("You bust")
             write("You lose")
             write(`Your balance is now ${list[player][3]}`)
+            multistand(player)
+        } else if (list[player][2] > 21){
+            write("You lose")
             multistand(player)
         } else {
             await multiask(["s","h"], player)
@@ -353,8 +359,8 @@ function begin() {
     box.appendChild(request)
     box.appendChild(submitBtn)
     startBtn.removeEventListener("click", begin)
-    startBtn.addEventListener("click", multistart)
-    multistart()
+    startBtn.addEventListener("click", start)
+    start()
 }
 
 function set_up() {
@@ -365,13 +371,39 @@ function set_up() {
     output.innerHTML = ""
 }
 
+function multibegin() {
+    output.className = "display"
+    startBtn.className = "restart-btn"
+    startBtn.textContent = "play again"
+    quit.id = "quit"
+	quit.textContent = "Quit Game"
+    tag.href = "index.html"
+    tag.appendChild(quit)
+    box.appendChild(request)
+    box.appendChild(submitBtn)
+    startBtn.removeEventListener("click", begin)
+    startBtn.addEventListener("click", multistart)
+    multistart()
+}
+
+function multiset_up() {
+    tag.remove()
+    full_deck()
+	startBtn.style.display = "none"
+    output.textContent = ""
+    output.innerHTML = ""
+
+    [dl[0], dl[1]] = [cards(), cards()]
+    [p1[0], p1[1]] = [cards(), cards()]
+
+}
+
 async function multistart() {
     if (gameRunning) {return}
     gameRunning = true
-	set_up()
+	multiset_up()
     full_deck()
-    let dl = [cards(), cards()]
-    let p1 = [cards(), cards()]
+    
     list = []
     list.push(dl)
     list.push(p1)
@@ -659,4 +691,4 @@ async function start() {
 }
 
 startBtn.className = "start-btn"
-startBtn.addEventListener("click", begin)
+startBtn.addEventListener("click", multibegin)
