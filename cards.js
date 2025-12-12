@@ -23,8 +23,9 @@ let orange
 let gameRunning = false
 let a
 let players
-let list
+let list = []
 let dv
+let playbtn
 
 const output = document.getElementById("output")
 const startBtn = document.getElementById("start-btn")
@@ -161,6 +162,26 @@ function write(msg) {
         output.textContent += msg + "\n"
     } 
     output.scrollTop = output.scrollHeight;
+}
+
+async function assignPlayer(){
+    for (let c = 0; c < 9; c++) {
+		let btn = document.createElement("button");
+		btn.textContent = (c + 1).toString();
+		btn.id = "player-btn";
+        playbtn = document.getElementById("player-btn")
+        document.appendChild(btn);
+		btn.addEventListener("click", (ev) => {
+			players = Number(btn.textContent)
+            playbtn.remove()
+		});
+	}	
+    for (let i = 1; i >= players; i++) {
+        let name = String(await returnElement)
+        list.push(playerFactory(name));
+    }
+
+
 }
 
 function winChecker(){
@@ -371,8 +392,8 @@ function set_up() {
     output.innerHTML = ""
 }
 
-function multibegin() {
-    output.className = "display"
+async function multibegin() {
+    
     startBtn.className = "restart-btn"
     startBtn.textContent = "play again"
     quit.id = "quit"
@@ -381,6 +402,8 @@ function multibegin() {
     tag.appendChild(quit)
     box.appendChild(request)
     box.appendChild(submitBtn)
+    await assignPlayer()
+    output.className = "display"
     startBtn.removeEventListener("click", begin)
     startBtn.addEventListener("click", multistart)
     multistart()
@@ -404,7 +427,7 @@ async function multistart() {
 	multiset_up()
     full_deck()
     
-    list = []
+
     list.push(dl)
     list.push(p1)
     dv = cardValue[list[0][0]] + cardValue[list[0][1]]
@@ -415,6 +438,26 @@ async function multistart() {
     
     players = 2
     
+
+    function playerFactory(username) {
+        const player = {
+            username: username,
+            balance: 1000,
+            hand: {
+                card1: cards(),
+                card2: cards()
+            },
+            getValue: function() {
+                return this.hand.card1 + this.hand.card2
+            },
+
+        }
+
+        return player
+
+    }
+    
+
     if (players === 2) {
         let p2 = []
         p2.push(cards())
