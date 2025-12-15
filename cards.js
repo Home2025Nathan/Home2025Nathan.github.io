@@ -26,6 +26,15 @@ let players
 let list = []
 let dv
 let playbtn
+let dl = {
+    hand: {
+    card1: 0,
+    card2: 0
+    },
+    getValue: function() {
+        return this.hand.card1 + this.hand.card2
+    }
+}
 
 const output = document.getElementById("output")
 const startBtn = document.getElementById("start-btn")
@@ -164,16 +173,33 @@ function write(msg) {
     output.scrollTop = output.scrollHeight;
 }
 
+function playerFactory(username) {
+    const player = {
+        username: username,
+        balance: 1000,
+        hand: {
+            card1: cards(),
+            card2: cards()
+        },
+        getValue: function() {
+            return this.hand.card1 + this.hand.card2
+        },
+        bet: 0
+    }
+    return player
+}
+
 async function assignPlayer(){
-    for (let c = 0; c < 9; c++) {
+    let rowbtn = document.getElementById("rowbtn")
+    for (let c = 1; c < 9; c++) {
 		let btn = document.createElement("button");
-		btn.textContent = (c + 1).toString();
+		btn.textContent = (c).toString();
 		btn.id = "player-btn";
         playbtn = document.getElementById("player-btn")
-        document.appendChild(btn);
+        rowbtn.appendChild(btn);
 		btn.addEventListener("click", (ev) => {
 			players = Number(btn.textContent)
-            playbtn.remove()
+            rowbtn.remove()
 		});
 	}	
     for (let i = 1; i >= players; i++) {
@@ -393,7 +419,6 @@ function set_up() {
 }
 
 async function multibegin() {
-    
     startBtn.className = "restart-btn"
     startBtn.textContent = "play again"
     quit.id = "quit"
@@ -402,6 +427,7 @@ async function multibegin() {
     tag.appendChild(quit)
     box.appendChild(request)
     box.appendChild(submitBtn)
+    list.push(dl)
     await assignPlayer()
     output.className = "display"
     startBtn.removeEventListener("click", begin)
@@ -416,9 +442,8 @@ function multiset_up() {
     output.textContent = ""
     output.innerHTML = ""
 
-    [dl[0], dl[1]] = [cards(), cards()]
-    [p1[0], p1[1]] = [cards(), cards()]
-
+    dl.hand.card1 = cards()
+    dl.hand.card1 = cards()    
 }
 
 async function multistart() {
@@ -426,107 +451,48 @@ async function multistart() {
     gameRunning = true
 	multiset_up()
     full_deck()
-    
-
-    list.push(dl)
-    list.push(p1)
-    dv = cardValue[list[0][0]] + cardValue[list[0][1]]
-    dl.push(dv)
-    let v1 = cardValue[list[1][0]] + cardValue[list[1][1]]
-    p1.push(v1)
-    p1.push(1000)
-    
-    players = 2
-    
-
-    function playerFactory(username) {
-        const player = {
-            username: username,
-            balance: 1000,
-            hand: {
-                card1: cards(),
-                card2: cards()
-            },
-            getValue: function() {
-                return this.hand.card1 + this.hand.card2
-            },
-
-        }
-
-        return player
-
-    }
-    
-
-    if (players === 2) {
-        let p2 = []
-        p2.push(cards())
-        p2.push(cards())
-        list.push(p2)
-        let v2 = cardValue[list[2][0]] + cardValue[list[2][1]]
-        p2.push(v2)
-        p2.push(1000)
-    }
-    if (players === 3) {
-        let p3 = []
-        p3.push(cards())
-        p3.push(cards())
-        list.push(p3)
-        let v3 = cardValue[list[3][0]] + cardValue[list[3][1]]
-        p3.push(v3)
-        p3.push(1000)
-    }
-    if (players === 4) {
-        let p4 = []
-        p4.push(cards())
-        p4.push(cards())
-        list.push(p4)
-        let v4 = cardValue[list[4][0]] + cardValue[list[4][1]]
-        p4.push(v4)
-        p4.push(1000)
-    }
 
     for (let i = 1; i <= players; i++) {
         while (true) {
             dollars = 0
-            write(`Player ${i} balance is $${list[i][3]}`)
+            write(`Player ${i} balance is $${list[i].balance}`)
             write([1, "Place your bet: "])
             dollars = await multibet(); 
             write(dollars)
-            if (dollars > list[i][3]) {
+            if (dollars > list[i].balance) {
                 await sleep(0.5)
                 write(`You spent $${dollars}`)
                 write("Insufficient funds")
                 write("")
                 continue
             }
-            list[i][3] -= dollars
-            list[i].push(dollars)
+            list[i].balance -= dollars
+            list[i].bet = dollars
             break
         }
     }
 
 
     for (let i = 1; i <= players; i++) {
-        if (cardValue[list[i][0]] === 8 || cardValue[list[i][0]] === 11 || cardValue[list[i][0]] === 18) {
-            write(`Player${i}'s first card is an ${list[i][0]}`)
+        if (cardValue[list[i].hand.card1] === 8 || cardValue[list[i].hand.card1] === 11) {
+            write(`Player${i}'s first card is an ${list[i].hand.card1}`)
             await sleep(1)
         } else {
-            write(`Player${i}'s first card is a ${list[i][0]}`)
+            write(`Player${i}'s first card is a ${list[i].hand.card1}`)
             await sleep(1)
         }
-        if (cardValue[list[i][1]] === 8 || cardValue[list[i][1]] === 11 || cardValue[list[i][1]] === 18) {
-            write(`Player${i}'s second card is an ${list[i][1]}`)
+        if (cardValue[list[i].hand.card1] === 8 || cardValue[list[i].hand.card1] === 11) {
+            write(`Player${i}'s second card is an ${list[i].hand.card2}`)
             await sleep(1)
         } else {
-            write(`Player${i}'s second card is a ${list[i][1]}`)
+            write(`Player${i}'s second card is a ${list[i].hand.card2}`)
             await sleep(1)
         }
     }
     write(" ")
 
     for (let i = 1; i <= players; i++) {
-        if (list[i][2] === 21 && dv != 21) {
+        if (list[i].getValue === 21 && list[] != 21) {
             write(`Player${i} has Blackjack!!!!!`)
         } else if (dv === 21 && list[i][2] === 21) {
             write(`The dealer shows that his second card is a ${list[0][1]}`)
