@@ -197,12 +197,14 @@ async function assignPlayer(){
 		btn.id = "player-btn";
         playbtn = document.getElementById("player-btn")
         rowbtn.appendChild(btn);
+        write("hhhh")
 		btn.addEventListener("click", (ev) => {
 			players = Number(btn.textContent)
             rowbtn.remove()
 		});
 	}	
     for (let i = 1; i >= players; i++) {
+        write("Type your username")
         let name = String(await returnElement)
         list.push(playerFactory(name));
     }
@@ -428,8 +430,8 @@ async function multibegin() {
     box.appendChild(request)
     box.appendChild(submitBtn)
     list.push(dl)
-    await assignPlayer()
     output.className = "display"
+    await assignPlayer()
     startBtn.removeEventListener("click", begin)
     startBtn.addEventListener("click", multistart)
     multistart()
@@ -492,7 +494,7 @@ async function multistart() {
     write(" ")
 
     for (let i = 1; i <= players; i++) {
-        if (list[i].getValue === 21 && list[] != 21) {
+        if (list[i].getValue === 21 && list[0].getValue != 21) {
             write(`Player${i} has Blackjack!!!!!`)
         } else if (dv === 21 && list[i][2] === 21) {
             write(`The dealer shows that his second card is a ${list[0][1]}`)
