@@ -26,13 +26,16 @@ let players
 let list = []
 let dv
 let playbtn
+let beginning = true
 let dl = {
     hand: {
     card1: 0,
-    card2: 0
+    card2: 0,
+    cardsNew: 0
     },
     getValue: function() {
-        return this.hand.card1 + this.hand.card2
+        let newCardValue = this.hand.cardsNew ? cardValue[this.hand.cardsNew] : 0;
+        return cardValue[this.hand.card1] + cardValue[this.hand.card2] + newCardValue
     }
 }
 
@@ -178,11 +181,13 @@ function playerFactory(username) {
         username: username,
         balance: 1000,
         hand: {
-            card1: cards(),
-            card2: cards()
+            card1: 0,
+            card2: 0,
+            cardsNew: 0
         },
         getValue: function() {
-            return this.hand.card1 + this.hand.card2
+            let newCardValue = this.hand.cardsNew ? cardValue[this.hand.cardsNew] : 0;
+            return cardValue[this.hand.card1] + cardValue[this.hand.card2] + newCardValue;
         },
         bet: 0
     }
@@ -191,25 +196,24 @@ function playerFactory(username) {
 
 async function assignPlayer(){
     let rowbtn = document.getElementById("rowbtn")
-    for (let c = 1; c < 9; c++) {
-		let btn = document.createElement("button");
-		btn.textContent = (c).toString();
-		btn.id = "player-btn";
-        playbtn = document.getElementById("player-btn")
-        rowbtn.appendChild(btn);
-        write("hhhh")
-		btn.addEventListener("click", (ev) => {
-			players = Number(btn.textContent)
-            rowbtn.remove()
-		});
-	}	
-    for (let i = 1; i >= players; i++) {
-        write("Type your username")
-        let name = String(await returnElement)
+    write([1,"How many players will you have: "])
+    players = await new Promise(resolve => {
+        for (let c = 1; c < 9; c++) {
+            let btn = document.createElement("button");
+            btn.innerHTML = c
+            btn.className = "numBtns"
+            rowbtn.appendChild(btn);
+            btn.addEventListener("click", () => {
+                rowbtn.remove()
+                resolve(c)
+            });
+	    }	
+    })   
+    for (let i = 1; i <= players; i++) {
+        write(`Player${i}, type your username: `)
+        let name = String(await returnElement())
         list.push(playerFactory(name));
     }
-
-
 }
 
 function winChecker(){
@@ -236,28 +240,28 @@ function winChecker(){
 
 function multiwinChecker(){
     for (let i = 1; i <= players; i++) {
-        if (list[i][2] <= 21) {
-            if (dv > 21) {
-                write(`The dealer has ${dv} points`)
+        if (list[i].getValue() <= 21) {
+            if (list[0].getValue() > 21) {
+                write(`The dealer has ${list[0].getValue()} points`)
                 write("The dealer's hand is over 21")
                 write(`Player${i}, you win!`)
-                list[i][3] += list[i][4] * 2
-                write(`Player${i}, your balance is now ${list[i][3]}`)
-            } else if (dv >= 17) {
-                if (list[i][2] > dv) {
-                    write(`The Dealer has ${dv} points`)
+                list[i].balance += list[i].bet * 2
+                write(`Player${i}, your balance is now ${list[i].balance}`)
+            } else if (list[0].getValue() >= 17) {
+                if (list[i].getValue() > list[0].getValue()) {
+                    write(`The Dealer has ${list[0].getValue()} points`)
                     write(`Player${i}, you win`)
-                    list[i][3] += list[i][4] * 2
-                    write(`Player${i}, your balance is now ${list[i][3]}`)
-                } else if (list[i][2] < dv) {
-                    write(`The Dealer has ${dv} points`)
+                    list[i].balance += list[i].bet * 2
+                    write(`Player${i}, your balance is now ${list[i].balance}`)
+                } else if (list[i].getValue() < list[0].getValue()) {
+                    write(`The Dealer has ${list[0].getValue()} points`)
                     write(`Player${i}, you lose`)
-                    write(`Player${i}, your balance is now ${list[i][3]}`)
-                } else if (list[i][2] === dv) {
-                    write(`The Dealer has ${dv} points`)
+                    write(`Player${i}, your balance is now ${list[i].balance}`)
+                } else if (list[i].getValue() === list[0].getValue()) {
+                    write(`The Dealer has ${list[0].getValue()} points`)
                     write(`Player${i}, you tie`)
-                    list[i][3] += list[i][4]
-                    write(`Player${i}, your balance is now ${list[i][3]}`)
+                    list[i].balance += list[i].bet
+                    write(`Player${i}, your balance is now ${list[i].balance}`)
                 }
             }
         } else {
@@ -296,28 +300,29 @@ async function stand() {
 
 async function multistand(player) {
     if (player === players){
-        write(`Dealer's hand: ${list[0][0]} and ${list[0][1]}`)
+        write(`Dealer's hand: ${list[0].hand.card1} and ${list[0].hand.card2}`)
         await sleep(1)
-        while (dv < 17) {
-            if (cardValue[list[0][1]] === 8 || cardValue[[list[0][1]]] === 11 || cardValue[[list[0][1]]] === 18) {
-                write(`The dealer draws an ${[list[0][1]]}`)
+        while (list[0].getValue() < 17) {
+            newCard = cards()
+            if (cardValue[newCard] === 8 || cardValue[newCard] === 11) {
+                write(`The dealer draws an ${newCard}`)
                 await sleep(1)
             } else {
-                write(`The dealer draws a ${[list[0][1]]}`)
+                write(`The dealer draws a ${newCard}`)
                 await sleep(1)
             }
-            dv += cardValue[[list[0][1]]]
+            list[0].hand.cardsNew += cardValue[newCard]
                 
-            if (dv > 21 && newCard[list[0][1]] === 'Ace') {
-                dv -= 10
+            if (list[0].getValue() > 21 && newCard === 'Ace') {
+                list[0].hand.cardsNew -= 10
             }
             if (dv === 21) {
                 await sleep(1)
-                write(`The Dealer has ${dv} points`)
+                write(`The Dealer has ${list[0].getValue()} points`)
                 write("He yells BlackJack!")
-            } else if (dv < 17) {
+            } else if (list[0].getValue() < 17) {
                 await sleep(1)
-                write(`The Dealer has ${dv} points`)
+                write(`The Dealer has ${list[0].getValue()} points`)
             }
         }
         multiwinChecker()
@@ -329,25 +334,25 @@ async function multistand(player) {
 }
 
 async function multihit(player){
-    while (list[player][2] <= 21 && choice === "h") {
+    while (true) {
         newCard = cards()
-        if (cardValue[newCard] === 8 || cardValue[newCard] === 11 || cardValue[newCard] === 18) {
+        if (cardValue[newCard] === 8 || cardValue[newCard] === 11) {
             write(`You drew an ${newCard}`)
         } else {
             write(`You drew a ${newCard}`)
         }
-        list[player][2] += cardValue[newCard]
-        if (list[player][2] > 21 && newCard === "Ace") {
-            list[player][2] -= 10 
+        list[player].hand.cardsNew += cardValue[newCard]
+        if (list[player].getValue() > 21 && newCard === "Ace") {
+            list[player].getValue() -= 10 
         }
-        write(`You have ${list[player][2]} points`) 
-        if (list[player][2] > 21 && player === players) {
+        write(`You have ${list[player].getValue()} points`) 
+        if (list[player].getValue() > 21 && player === players) {
             write("Your hand went over 21")
             write("You bust")
             write("You lose")
-            write(`Your balance is now ${list[player][3]}`)
+            write(`Your balance is now ${list[player].balance}`)
             multistand(player)
-        } else if (list[player][2] > 21){
+        } else if (list[player].getValue() > 21){
             write("You lose")
             multistand(player)
         } else {
@@ -432,7 +437,7 @@ async function multibegin() {
     list.push(dl)
     output.className = "display"
     await assignPlayer()
-    startBtn.removeEventListener("click", begin)
+    startBtn.removeEventListener("click", multibegin)
     startBtn.addEventListener("click", multistart)
     multistart()
 }
@@ -443,17 +448,17 @@ function multiset_up() {
 	startBtn.style.display = "none"
     output.textContent = ""
     output.innerHTML = ""
-
-    dl.hand.card1 = cards()
-    dl.hand.card1 = cards()    
+    for (let i = 0; i <= players; i++) {
+        list[i].hand.card1 = cards()
+        list[i].hand.card2 = cards()
+        list[i].hand.cardsNew = 0
+    }   
 }
 
 async function multistart() {
     if (gameRunning) {return}
     gameRunning = true
 	multiset_up()
-    full_deck()
-
     for (let i = 1; i <= players; i++) {
         while (true) {
             dollars = 0
@@ -494,25 +499,25 @@ async function multistart() {
     write(" ")
 
     for (let i = 1; i <= players; i++) {
-        if (list[i].getValue === 21 && list[0].getValue != 21) {
+        if (list[i].getValue() === 21 && list[0].getValue() != 21) {
             write(`Player${i} has Blackjack!!!!!`)
-        } else if (dv === 21 && list[i][2] === 21) {
-            write(`The dealer shows that his second card is a ${list[0][1]}`)
+        } else if (dv === 21 && list[i].getValue() === 21) {
+            write(`The dealer shows that his second card is a ${list[0].hand.card2}`)
             write("Blackjack!!!!!!!!")
             write("You tie")
-            list[i][3] += list[i][4]
+            list[i].balance += list[i].bet
             replay()
         }
     }
 
-    if (cardValue[list[0][0]] === 8 || cardValue[list[0][0]] === 11 || cardValue[list[0][0]] === 18) {
-        write(`The dealer's first card is an ${list[0][0]}`)
+    if (cardValue[list[0].hand.card1] === 8 || cardValue[list[0].hand.card1] === 11) {
+        write(`The dealer's first card is an ${list[0].hand.card1}`)
         await sleep(1)
     } else { 
-        write(`The dealer's first card is a ${list[0][0]}`)
+        write(`The dealer's first card is a ${list[0].hand.card1}`)
         await sleep(1)
     }
-    if (dealer === 21 && list[i][2] != 21) {
+    if (dealer === 21 && list[i].getValue() != 21) {
         multiwinChecker()
     }
 
