@@ -34,8 +34,7 @@ let dl = {
     cardsNew: 0
     },
     getValue: function() {
-        let newCardValue = this.hand.cardsNew ? cardValue[this.hand.cardsNew] : 0;
-        return cardValue[this.hand.card1] + cardValue[this.hand.card2] + newCardValue
+        return cardValue[this.hand.card1] + cardValue[this.hand.card2] + this.hand.cardsNew
     }
 }
 
@@ -114,15 +113,16 @@ async function returnElement() {
 
 async function multiask(allowed, player) {
     while (true) {
-        write(`player${player}, type ${allowed[0]} or ${allowed[1]} and press submit`)
+        write([1, `player${player}, type ${allowed[0]} or ${allowed[1]} and press submit: `])
         choice = (await returnElement()).toLowerCase()  
         if (allowed.includes(choice)) {
             if (choice === "s") {
+                write(choice)
                 await sleep(1)
-                return multistand(player)
+                return await multistand(player)
             } else if (choice === "h") {
                 await sleep(1)
-                return multihit(player)
+                return await multihit(player)
             }             
         } else {
         write("invalid input, try again")
@@ -132,9 +132,10 @@ async function multiask(allowed, player) {
 
 async function ask(allowed) {
     while (true) {
-        write(`type ${allowed[0]} or ${allowed[1]} and press submit`)
+        write([1, `type ${allowed[0]} or ${allowed[1]} and press submit`])
         choice = (await returnElement()).toLowerCase()
         if (allowed.includes(choice)) {
+            write(choice)
             return choice
         }
         write("invalid input, try again")
@@ -186,8 +187,7 @@ function playerFactory(username) {
             cardsNew: 0
         },
         getValue: function() {
-            let newCardValue = this.hand.cardsNew ? cardValue[this.hand.cardsNew] : 0;
-            return cardValue[this.hand.card1] + cardValue[this.hand.card2] + newCardValue;
+            return cardValue[this.hand.card1] + cardValue[this.hand.card2] + this.hand.cardsNew;
         },
         bet: 0
     }
@@ -205,6 +205,7 @@ async function assignPlayer(){
             rowbtn.appendChild(btn);
             btn.addEventListener("click", () => {
                 rowbtn.remove()
+                write(c)
                 resolve(c)
             });
 	    }	
@@ -316,7 +317,7 @@ async function multistand(player) {
             if (list[0].getValue() > 21 && newCard === 'Ace') {
                 list[0].hand.cardsNew -= 10
             }
-            if (dv === 21) {
+            if (list[0].getValue() === 21) {
                 await sleep(1)
                 write(`The Dealer has ${list[0].getValue()} points`)
                 write("He yells BlackJack!")
@@ -329,7 +330,7 @@ async function multistand(player) {
         replay()
     } else {
         player += 1
-        await multiask(["s", "h"], player)
+        return await multiask(["s", "h"], player)
     }
 }
 
@@ -351,12 +352,12 @@ async function multihit(player){
             write("You bust")
             write("You lose")
             write(`Your balance is now ${list[player].balance}`)
-            multistand(player)
+            return await multistand(player)
         } else if (list[player].getValue() > 21){
             write("You lose")
-            multistand(player)
+            return await multistand(player)
         } else {
-            await multiask(["s","h"], player)
+            return await multiask(["s","h"], player)
         }
     }
 }
@@ -501,7 +502,7 @@ async function multistart() {
     for (let i = 1; i <= players; i++) {
         if (list[i].getValue() === 21 && list[0].getValue() != 21) {
             write(`Player${i} has Blackjack!!!!!`)
-        } else if (dv === 21 && list[i].getValue() === 21) {
+        } else if (list[0].getValue() && list[i].getValue() === 21) {
             write(`The dealer shows that his second card is a ${list[0].hand.card2}`)
             write("Blackjack!!!!!!!!")
             write("You tie")
@@ -521,7 +522,7 @@ async function multistart() {
         multiwinChecker()
     }
 
-    await multiask(["s","h"], 1)
+    return await multiask(["s","h"], 1)
 }
 
 async function start() {
