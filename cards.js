@@ -28,6 +28,7 @@ let dv
 let playbtn
 let beginning = true
 let dl = {
+    username: "dealer",
     hand: {
     card1: 0,
     card2: 0,
@@ -114,13 +115,14 @@ async function returnElement() {
 async function multiask(allowed, player) {
     while (true) {
         write([1, `player${player}, type ${allowed[0]} or ${allowed[1]} and press submit: `])
-        choice = (await returnElement()).toLowerCase()  
+        choice = (await returnElement()).trim().toLowerCase()  
         if (allowed.includes(choice)) {
             if (choice === "s") {
                 write(choice)
                 await sleep(1)
                 return await multistand(player)
             } else if (choice === "h") {
+                write(choice)
                 await sleep(1)
                 return await multihit(player)
             }             
@@ -135,7 +137,6 @@ async function ask(allowed) {
         write([1, `type ${allowed[0]} or ${allowed[1]} and press submit`])
         choice = (await returnElement()).toLowerCase()
         if (allowed.includes(choice)) {
-            write(choice)
             return choice
         }
         write("invalid input, try again")
@@ -211,9 +212,22 @@ async function assignPlayer(){
 	    }	
     })   
     for (let i = 1; i <= players; i++) {
-        write(`Player${i}, type your username: `)
-        let name = String(await returnElement())
-        list.push(playerFactory(name));
+        while (true) {
+            write([1, `Player${i}, type your username: `])
+            let name = (String(await returnElement())).trim()
+            if (list.some(p => p.username.toLowerCase() === name.toLowerCase())) {
+                write("")
+                write("This username is taken")
+                continue
+            }
+            write(name)
+            if (name === "") {
+                continue
+            }
+            list.push(playerFactory(name));
+            await sleep(0.5)
+            break
+        }
     }
 }
 
@@ -395,8 +409,9 @@ async function hit(){
 function replay(){
 	gameRunning = false
 	document.body.appendChild(tag)
-    if (balance > 0) {
+    if (list.some(p => p.balance > 0)) {
         startBtn.style.display = "flex"
+    }
     } else {
         write("Your balance is too low to play again. Come back soon.")
         exit()
@@ -463,7 +478,11 @@ async function multistart() {
     for (let i = 1; i <= players; i++) {
         while (true) {
             dollars = 0
-            write(`Player ${i} balance is $${list[i].balance}`)
+            write(`Player ${list[i].username}'s balance is $${list[i].balance}`)
+            if (list[i].balance === 0) {
+                write(`Player ${list[i].username} is bankrupt`)
+                break
+            }
             write([1, "Place your bet: "])
             dollars = await multibet(); 
             write(dollars)
