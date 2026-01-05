@@ -168,6 +168,12 @@ async function multibet() {
 
 }
 
+function aceCheck(player, item) {
+    if (list[player].getValue() > 21 && list[player].hand[item] === "Ace" || list[player].getValue() > 21 && newCard === "Ace") {
+        list[player].hand.cardsNew -= 10 
+    }
+}
+
 
 function write(msg) {
     if (msg[0] === 1) {
@@ -328,9 +334,8 @@ async function multistand(player) {
             }
             list[0].hand.cardsNew += cardValue[newCard]
                 
-            if (list[0].getValue() > 21 && newCard === 'Ace') {
-                list[0].hand.cardsNew -= 10
-            }
+            aceCheck(0, newCard)
+
             if (list[0].getValue() === 21) {
                 await sleep(1)
                 write(`The Dealer has ${list[0].getValue()} points`)
@@ -357,9 +362,8 @@ async function multihit(player){
             write(`You drew a ${newCard}`)
         }
         list[player].hand.cardsNew += cardValue[newCard]
-        if (list[player].getValue() > 21 && newCard === "Ace") {
-            list[player].getValue() -= 10 
-        }
+        aceCheck(player, newCard)
+
         write(`You have ${list[player].getValue()} points`) 
         if (list[player].getValue() > 21 && player === players) {
             write("Your hand went over 21")
@@ -411,7 +415,6 @@ function replay(){
 	document.body.appendChild(tag)
     if (list.some(p => p.balance > 0)) {
         startBtn.style.display = "flex"
-    }
     } else {
         write("Your balance is too low to play again. Come back soon.")
         exit()
@@ -467,6 +470,7 @@ function multiset_up() {
     for (let i = 0; i <= players; i++) {
         list[i].hand.card1 = cards()
         list[i].hand.card2 = cards()
+        aceCheck(i, "card2")
         list[i].hand.cardsNew = 0
     }   
 }
