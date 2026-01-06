@@ -114,20 +114,29 @@ async function returnElement() {
 
 async function multiask(allowed, player) {
     while (true) {
-        write([1, `player${player}, type ${allowed[0]} or ${allowed[1]} and press submit: `])
-        choice = (await returnElement()).trim().toLowerCase()  
-        if (allowed.includes(choice)) {
-            if (choice === "s") {
-                write(choice)
-                await sleep(1)
-                return await multistand(player)
-            } else if (choice === "h") {
-                write(choice)
-                await sleep(1)
-                return await multihit(player)
-            }             
+        if (allowed.includes("surrender")) {
+            write([1, `player${player}, type ${allowed[0]}, ${allowed[1]}, or ${allowed[2]} and press submit: `])
         } else {
-        write("invalid input, try again")
+            write([1, `player${player}, type ${allowed[0]}, or ${allowed[1]} and press submit: `])
+        }
+        choice = (await returnElement()).trim().toLowerCase()  
+        
+        if (choice === "s") {
+            write(choice)
+            await sleep(1)
+            return await multistand(player)
+        } else if (choice === "h") {
+            write(choice)
+            await sleep(1)
+            return await multihit(player)
+        } else if (allowed.includes(choice) && choice === "surrender") {
+            write(choice)
+            await sleep(1)
+            list[player].surrender = true
+            list[player].balance += list[player].bet / 2
+            return await multistand(player)
+        } else {
+            write("invalid input, try again")
         }
     }
 }
@@ -168,6 +177,7 @@ function playerFactory(username) {
     const player = {
         username: username,
         balance: 1000,
+        surrender: false,
         hand: {
             card1: 0,
             card2: 0,
@@ -236,7 +246,7 @@ async function assignPlayer(){
 
 function multiwinChecker(){
     for (let i = 1; i <= players; i++) {
-        if (list[i].getValue() <= 21) {
+        if (list[i].getValue() <= 21 && list[i].surrender === false) {
             if (list[0].getValue() > 21) {
                 write(`The dealer has ${list[0].getValue()} points`)
                 write("The dealer's hand is over 21")
@@ -261,7 +271,9 @@ function multiwinChecker(){
                 }
             }
         } else {
-            write(`Player${i} already busted`)
+            if (list[i].surrender === true) {
+                write(`Player${i} already surrendered and lost`)
+            } else (write(`Player${i} already busted`))
         }
     }
 }
@@ -296,7 +308,7 @@ async function multistand(player) {
         replay()
     } else {
         player += 1
-        return await multiask(["s", "h"], player)
+        return await multiask(["s", "h", "surrender"], player)
     }
 }
 
@@ -440,7 +452,7 @@ async function multistart() {
         multiwinChecker()
     }
 
-    return await multiask(["s","h"], 1)
+    return await multiask(["s","h", "surrender"], 1)
 }
 
 
