@@ -114,11 +114,16 @@ async function returnElement() {
 
 async function multiask(allowed, player) {
     while (true) {
-        if (allowed.includes("surrender")) {
+        if (allowed.includes("surrender") && allowed.includes("doubledown")) {
+            write([1, `player${player}, type ${allowed[0]}, ${allowed[1]}, ${allowed[2]}, or ${allowed[3]} and press submit: `])
+        } else if (allowed.includes("surrender")) {
             write([1, `player${player}, type ${allowed[0]}, ${allowed[1]}, or ${allowed[2]} and press submit: `])
+        } else if (allowed.includes("doubledown")) {
+            write([1, `player${player}, type ${allowed[0]}, ${allowed[1]}, or ${allowed[3]} and press submit: `])
         } else {
             write([1, `player${player}, type ${allowed[0]}, or ${allowed[1]} and press submit: `])
         }
+        
         choice = (await returnElement()).trim().toLowerCase()  
         
         if (choice === "s") {
@@ -135,6 +140,10 @@ async function multiask(allowed, player) {
             list[player].surrender = true
             list[player].balance += list[player].bet / 2
             return await multistand(player)
+        } else if (allowed.includes("doubledown")) {
+            write(choice)
+            await sleep(1)
+            return await multihit(player)
         } else {
             write("invalid input, try again")
         }
@@ -178,6 +187,7 @@ function playerFactory(username) {
         username: username,
         balance: 1000,
         surrender: false,
+        doubleDown: false,
         hand: {
             card1: 0,
             card2: 0,
@@ -308,7 +318,7 @@ async function multistand(player) {
         replay()
     } else {
         player += 1
-        return await multiask(["s", "h", "surrender"], player)
+        return await multiask(["s", "h", "surrender", "doubledown"], player)
     }
 }
 
@@ -332,6 +342,9 @@ async function multihit(player){
             return await multistand(player)
         } else if (list[player].getValue() > 21){
             write("You lose")
+            return await multistand(player)
+        } else if (list[player].doubleDown = true) {
+            list[player].bet *= 2
             return await multistand(player)
         } else {
             return await multiask(["s","h"], player)
@@ -452,7 +465,7 @@ async function multistart() {
         multiwinChecker()
     }
 
-    return await multiask(["s","h", "surrender"], 1)
+    return await multiask(["s","h", "surrender", "doubledown"], 1)
 }
 
 
