@@ -169,8 +169,8 @@ async function multibet() {
 }
 
 function aceCheck(player, item) {
-    if (list[player].getValue() > 21 && list[player].hand[item] === "Ace" || list[player].getValue() > 21 && newCard === "Ace") {
-        list[player].hand.cardsNew -= 10 
+    if (item === "Ace") {
+        list[player].aces += 1
     }
 }
 
@@ -185,6 +185,9 @@ function write(msg) {
 }
 
 function playerFactory(username) {
+    if (username === undefined) {
+        username = "player"
+    }
     const player = {
         username: username,
         balance: 1000,
@@ -193,10 +196,23 @@ function playerFactory(username) {
             card2: 0,
             cardsNew: 0
         },
-        getValue: function() {
-            return cardValue[this.hand.card1] + cardValue[this.hand.card2] + this.hand.cardsNew;
+        aces: 0,
+        aceValue: function() {
+            let holding = cardValue[this.hand.card1] + cardValue[this.hand.card2] + this.hand.cardsNew 
+            let acesToMinus = 0
+            let acesAvailable = this.aces
+            while (holding > 21 && acesAvailable > 0) {
+                holding -= 10
+                acesAvailable -= 1
+                acesToMinus += 1
+            }
+            return acesToMinus * 10
         },
-        bet: 0
+        getValue: function() {
+            return cardValue[this.hand.card1] + cardValue[this.hand.card2] + this.hand.cardsNew - this.aceValue();
+        },
+        bet: 0,
+        
     }
     return player
 }
@@ -217,23 +233,27 @@ async function assignPlayer(){
             });
 	    }	
     })   
-    for (let i = 1; i <= players; i++) {
-        while (true) {
-            write([1, `Player${i}, type your username: `])
-            let name = (String(await returnElement())).trim()
-            if (list.some(p => p.username.toLowerCase() === name.toLowerCase())) {
-                write("")
-                write("This username is taken")
-                continue
+    if (players > 1) {
+        for (let i = 1; i <= players; i++) {
+            while (true) {
+                write([1, `Player${i}, type your username: `])
+                let name = (String(await returnElement())).trim()
+                if (list.some(p => p.username.toLowerCase() === name.toLowerCase())) {
+                    write("")
+                    write("This username is taken")
+                    continue
+                }
+                write(name)
+                if (name === "") {
+                    continue
+                }
+                list.push(playerFactory(name));
+                await sleep(0.5)
+                break
             }
-            write(name)
-            if (name === "") {
-                continue
-            }
-            list.push(playerFactory(name));
-            await sleep(0.5)
-            break
         }
+    } else {
+        list.push(playerFactory(undefined))
     }
 }
 
@@ -470,7 +490,9 @@ function multiset_up() {
     for (let i = 0; i <= players; i++) {
         list[i].hand.card1 = cards()
         list[i].hand.card2 = cards()
-        aceCheck(i, "card2")
+        list[i].aces = 0
+        if (list[i].hand.card1 === "Ace") list[i].aces += 1
+        if (list[i].hand.card2 === "Ace") list[i].aces += 1
         list[i].hand.cardsNew = 0
     }   
 }
