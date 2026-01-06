@@ -132,29 +132,6 @@ async function multiask(allowed, player) {
     }
 }
 
-async function ask(allowed) {
-    while (true) {
-        write([1, `type ${allowed[0]} or ${allowed[1]} and press submit`])
-        choice = (await returnElement()).toLowerCase()
-        if (allowed.includes(choice)) {
-            return choice
-        }
-        write("invalid input, try again")
-    }
-}
-
-async function bet(col) {
-    while (true) {
-        choice = parseFloat(await returnElement())
-        if (!Number.isNaN(choice && choice > 0)) {
-            return choice
-        }
-        write(" ")
-        write("invalid input, try again")
-        write([1, `${col} chips – $${a}: `])
-    }
-}
-
 async function multibet() {
     while (true) {
         choice = parseFloat(await returnElement())
@@ -257,28 +234,6 @@ async function assignPlayer(){
     }
 }
 
-function winChecker(){
-    if (dealer > 21) {
-        write(`The dealer has ${dv} points`)
-        write("The dealer's hand is over 21")
-        write("You win")
-        balance += dollars * 2
-    } else if (dealer >= 17) {
-        if (value > dealer) {
-            write(`The Dealer has ${dv} points`)
-            write("You win")
-            balance += dollars * 2
-        } else if (value < dealer) {
-            write(`The Dealer has ${dv} points`)
-            write("You lose")
-        } else if (value === dealer) {
-            write(`The Dealer has ${dv} points`)
-            write("You tie")
-            balance += dollars
-        }
-    }
-}
-
 function multiwinChecker(){
     for (let i = 1; i <= players; i++) {
         if (list[i].getValue() <= 21) {
@@ -309,34 +264,6 @@ function multiwinChecker(){
             write(`Player${i} already busted`)
         }
     }
-}
-
-
-async function stand() {
-    write(`Dealer's hand: ${dFirst} and ${dSecond}`)
-    await sleep(1)
-    winChecker()
-    while (dealer < 17) {
-        newCard = cards()
-        if (cardValue[newCard] === 8 || cardValue[newCard] === 11 || cardValue[newCard] === 18) {
-            write(`The dealer draws an ${newCard}`)
-            await sleep(1)
-        } else {
-            write(`The dealer draws a ${newCard}`)
-            await sleep(1)
-        }
-        dealer += cardValue[newCard]
-            
-        if (dealer > 21 && newCard === 'Ace') {
-            dealer -= 10
-        }
-        if (dealer < 17) {
-            await sleep(1)
-            write(`The Dealer has ${dealer} points`)
-        }
-    }
-    winChecker()
-    replay()
 }
 
 async function multistand(player) {
@@ -400,36 +327,6 @@ async function multihit(player){
     }
 }
 
-async function hit(){
-    while (value < 21 && choice === "h") {
-        newCard = cards()
-        if (cardValue[newCard] === 8 || cardValue[newCard] === 11 || cardValue[newCard] === 18) {
-            write(`You drew an ${newCard}`)
-        } else {
-            write(`You drew a ${newCard}`)
-        }
-        value += cardValue[newCard]
-        if (value > 21 && newCard === "Ace") {
-            value -= 10 
-        }
-        write(`You have ${value} points`)
-        if (value > 21) {
-            write("Your hand went over 21")
-            write("You bust")
-            write("You lose")
-            write(`Your balance is now ${balance}`)
-            replay()
-        } else {
-            choice = await ask(["s", "h"])
-            if (choice === "s") {
-                stand()
-            } else if (choice === "h") {
-                hit()
-            }
-        }
-    }
-}
-
 function replay(){
 	gameRunning = false
 	document.body.appendChild(tag)
@@ -439,29 +336,6 @@ function replay(){
         write("Your balance is too low to play again. Come back soon.")
         exit()
     }
-}
-
-function begin() {
-    output.className = "display"
-    startBtn.className = "restart-btn"
-    startBtn.textContent = "play again"
-    quit.id = "quit"
-	quit.textContent = "Quit Game"
-    tag.href = "index.html"
-    tag.appendChild(quit)
-    box.appendChild(request)
-    box.appendChild(submitBtn)
-    startBtn.removeEventListener("click", begin)
-    startBtn.addEventListener("click", start)
-    start()
-}
-
-function set_up() {
-    tag.remove()
-    full_deck()
-	startBtn.style.display = "none"
-    output.textContent = ""
-    output.innerHTML = ""
 }
 
 async function multibegin() {
@@ -525,7 +399,6 @@ async function multistart() {
         }
     }
 
-
     for (let i = 1; i <= players; i++) {
         if (cardValue[list[i].hand.card1] === 8 || cardValue[list[i].hand.card1] === 11) {
             write(`Player${i}'s first card is an ${list[i].hand.card1}`)
@@ -569,6 +442,138 @@ async function multistart() {
 
     return await multiask(["s","h"], 1)
 }
+
+
+
+
+
+
+async function ask(allowed) {
+    while (true) {
+        write([1, `type ${allowed[0]} or ${allowed[1]} and press submit`])
+        choice = (await returnElement()).toLowerCase()
+        if (allowed.includes(choice)) {
+            return choice
+        }
+        write("invalid input, try again")
+    }
+}
+
+
+async function bet(col) {
+    while (true) {
+        choice = parseFloat(await returnElement())
+        if (!Number.isNaN(choice && choice > 0)) {
+            return choice
+        }
+        write(" ")
+        write("invalid input, try again")
+        write([1, `${col} chips – $${a}: `])
+    }
+}
+
+function winChecker(){
+    if (dealer > 21) {
+        write(`The dealer has ${dv} points`)
+        write("The dealer's hand is over 21")
+        write("You win")
+        balance += dollars * 2
+    } else if (dealer >= 17) {
+        if (value > dealer) {
+            write(`The Dealer has ${dv} points`)
+            write("You win")
+            balance += dollars * 2
+        } else if (value < dealer) {
+            write(`The Dealer has ${dv} points`)
+            write("You lose")
+        } else if (value === dealer) {
+            write(`The Dealer has ${dv} points`)
+            write("You tie")
+            balance += dollars
+        }
+    }
+}
+
+async function stand() {
+    write(`Dealer's hand: ${dFirst} and ${dSecond}`)
+    await sleep(1)
+    winChecker()
+    while (dealer < 17) {
+        newCard = cards()
+        if (cardValue[newCard] === 8 || cardValue[newCard] === 11 || cardValue[newCard] === 18) {
+            write(`The dealer draws an ${newCard}`)
+            await sleep(1)
+        } else {
+            write(`The dealer draws a ${newCard}`)
+            await sleep(1)
+        }
+        dealer += cardValue[newCard]
+            
+        if (dealer > 21 && newCard === 'Ace') {
+            dealer -= 10
+        }
+        if (dealer < 17) {
+            await sleep(1)
+            write(`The Dealer has ${dealer} points`)
+        }
+    }
+    winChecker()
+    replay()
+}
+
+async function hit(){
+    while (value < 21 && choice === "h") {
+        newCard = cards()
+        if (cardValue[newCard] === 8 || cardValue[newCard] === 11 || cardValue[newCard] === 18) {
+            write(`You drew an ${newCard}`)
+        } else {
+            write(`You drew a ${newCard}`)
+        }
+        value += cardValue[newCard]
+        if (value > 21 && newCard === "Ace") {
+            value -= 10 
+        }
+        write(`You have ${value} points`)
+        if (value > 21) {
+            write("Your hand went over 21")
+            write("You bust")
+            write("You lose")
+            write(`Your balance is now ${balance}`)
+            replay()
+        } else {
+            choice = await ask(["s", "h"])
+            if (choice === "s") {
+                stand()
+            } else if (choice === "h") {
+                hit()
+            }
+        }
+    }
+}
+
+function begin() {
+    output.className = "display"
+    startBtn.className = "restart-btn"
+    startBtn.textContent = "play again"
+    quit.id = "quit"
+	quit.textContent = "Quit Game"
+    tag.href = "index.html"
+    tag.appendChild(quit)
+    box.appendChild(request)
+    box.appendChild(submitBtn)
+    startBtn.removeEventListener("click", begin)
+    startBtn.addEventListener("click", start)
+    start()
+}
+
+function set_up() {
+    tag.remove()
+    full_deck()
+	startBtn.style.display = "none"
+    output.textContent = ""
+    output.innerHTML = ""
+}
+
 
 async function start() {
     if (gameRunning) {return}
