@@ -112,38 +112,63 @@ async function returnElement() {
     })
 }
 
-async function multiask(allowed, player) {
+function formatOptions(arr) {
+    if (arr.length === 1) return arr[0]
+    if (arr.length === 2) return arr.join(" or ")
+    return arr.slice(0, -1).join(", ") + ", or " + arr.at(-1)
+}
+
+async function multiask(allowed, player, name) {
     while (true) {
-        if (allowed.includes("surrender") && allowed.includes("doubledown")) {
-            write([1, `player${player}, type ${allowed[0]}, ${allowed[1]}, ${allowed[2]}, or ${allowed[3]} and press submit: `])
-        } else if (allowed.includes("surrender")) {
-            write([1, `player${player}, type ${allowed[0]}, ${allowed[1]}, or ${allowed[2]} and press submit: `])
-        } else if (allowed.includes("doubledown")) {
-            write([1, `player${player}, type ${allowed[0]}, ${allowed[1]}, or ${allowed[3]} and press submit: `])
-        } else {
-            write([1, `player${player}, type ${allowed[0]}, or ${allowed[1]} and press submit: `])
-        }
+        write([1, `${name}, type ${formatOptions(allowed)} and press submit: `])
         
         choice = (await returnElement()).trim().toLowerCase()  
         
         if (choice === "s") {
             write(choice)
             await sleep(1)
-            return await multistand(player)
+            if (name.includes("_2")) {
+                return await multistand(player, true)
+            } else {
+                return await multistand(player)
+            }
         } else if (choice === "h") {
             write(choice)
             await sleep(1)
-            return await multihit(player)
+            if (name.includes("_2")) {
+                return await multihit(player, true)
+            } else {
+                return await multihit(player)
+            }
         } else if (allowed.includes(choice) && choice === "surrender") {
             write(choice)
             await sleep(1)
             list[player].surrender = true
             list[player].balance += list[player].bet / 2
             return await multistand(player)
-        } else if (allowed.includes("doubledown")) {
+        } else if (allowed.includes("doubledown") && choice === "doubledown") {
             write(choice)
             await sleep(1)
-            return await multihit(player)
+            if (list[player].balance < list[player].bet) {
+                write("Insufficient funds to double down")
+                continue
+            }
+            if (name.includes("_2")) {
+                list[player].split.balance -= list[player].bet
+                list[player].split.bet *= 2
+                list[player].split.doubleDown = true
+                return await multihit(player, true)
+            } else {
+                list[player].balance -= list[player].bet
+                list[player].bet *= 2
+                list[player].doubleDown = true
+                return await multihit(player)
+            }
+            
+        } else if (allowed.includes("split") && choice === "split") {
+            write(choice)
+            await sleep(1)
+            return await split(player)
         } else {
             write("invalid input, try again")
         }
@@ -163,9 +188,15 @@ async function multibet() {
 
 }
 
-function aceCheck(player, item) {
+function aceCheck(player, item, split) {
     if (item === "Ace") {
-        list[player].aces += 1
+        if (split === true) {
+            list[player].split.aces += 1
+            return
+        } else if (split === false) {
+            list[player].aces += 1
+            return
+        }
     }
 }
 
@@ -188,6 +219,7 @@ function playerFactory(username) {
         balance: 1000,
         surrender: false,
         doubleDown: false,
+        split: undefined,
         hand: {
             card1: 0,
             card2: 0,
@@ -256,40 +288,83 @@ async function assignPlayer(){
 
 function multiwinChecker(){
     for (let i = 1; i <= players; i++) {
-        if (list[i].getValue() <= 21 && list[i].surrender === false) {
-            if (list[0].getValue() > 21) {
-                write(`The dealer has ${list[0].getValue()} points`)
-                write("The dealer's hand is over 21")
-                write(`Player${i}, you win!`)
-                list[i].balance += list[i].bet * 2
-                write(`Player${i}, your balance is now ${list[i].balance}`)
-            } else if (list[0].getValue() >= 17) {
-                if (list[i].getValue() > list[0].getValue()) {
-                    write(`The Dealer has ${list[0].getValue()} points`)
-                    write(`Player${i}, you win`)
+        if (list[i].split !== undefined) {
+            if (list[i].getValue() <= 21 && list[i].surrender === false || list[i].split.getValue() <= 21 && list[i].surrender === false) {
+                if (list[0].getValue() > 21) {
+                    write(`The dealer has ${list[0].getValue()} points`)
+                    write("The dealer's hand is over 21")
+                    write(`Player${i}, you win!`)
                     list[i].balance += list[i].bet * 2
                     write(`Player${i}, your balance is now ${list[i].balance}`)
-                } else if (list[i].getValue() < list[0].getValue()) {
-                    write(`The Dealer has ${list[0].getValue()} points`)
-                    write(`Player${i}, you lose`)
-                    write(`Player${i}, your balance is now ${list[i].balance}`)
-                } else if (list[i].getValue() === list[0].getValue()) {
-                    write(`The Dealer has ${list[0].getValue()} points`)
-                    write(`Player${i}, you tie`)
-                    list[i].balance += list[i].bet
-                    write(`Player${i}, your balance is now ${list[i].balance}`)
+                } else if (list[0].getValue() >= 17) {
+                    if (list[i].getValue() > list[0].getValue()) {
+                        write(`The Dealer has ${list[0].getValue()} points`)
+                        write(`Player${i}, you win`)
+                        list[i].balance += list[i].bet * 2
+                        write(`Player${i}, your balance is now ${list[i].balance}`)
+                    } else if (list[i].getValue() < list[0].getValue()) {
+                        write(`The Dealer has ${list[0].getValue()} points`)
+                        write(`Player${i}, you lose`)
+                        write(`Player${i}, your balance is now ${list[i].balance}`)
+                    } else if (list[i].getValue() === list[0].getValue()) {
+                        write(`The Dealer has ${list[0].getValue()} points`)
+                        write(`Player${i}, you tie`)
+                        list[i].balance += list[i].bet
+                        write(`Player${i}, your balance is now ${list[i].balance}`)
+                    }
                 }
             }
         } else {
-            if (list[i].surrender === true) {
-                write(`Player${i} already surrendered and lost`)
-            } else (write(`Player${i} already busted`))
+            if (list[i].getValue() <= 21 && list[i].surrender === false) {
+                if (list[0].getValue() > 21) {
+                    write(`The dealer has ${list[0].getValue()} points`)
+                    write("The dealer's hand is over 21")
+                    write(`Player${i}, you win!`)
+                    list[i].balance += list[i].bet * 2
+                    write(`Player${i}, your balance is now ${list[i].balance}`)
+                } else if (list[0].getValue() >= 17) {
+                    if (list[i].getValue() > list[0].getValue()) {
+                        write(`The Dealer has ${list[0].getValue()} points`)
+                        write(`Player${i}, you win`)
+                        list[i].balance += list[i].bet * 2
+                        write(`Player${i}, your balance is now ${list[i].balance}`)
+                    } else if (list[i].getValue() < list[0].getValue()) {
+                        write(`The Dealer has ${list[0].getValue()} points`)
+                        write(`Player${i}, you lose`)
+                        write(`Player${i}, your balance is now ${list[i].balance}`)
+                    } else if (list[i].getValue() === list[0].getValue()) {
+                        write(`The Dealer has ${list[0].getValue()} points`)
+                        write(`Player${i}, you tie`)
+                        list[i].balance += list[i].bet
+                        write(`Player${i}, your balance is now ${list[i].balance}`)
+                    }
+                }
+            } else {
+                if (list[i].surrender === true) {
+                    write(`Player${i} already surrendered and lost`)
+                } else (write(`Player${i} already busted`))
+            }
         }
     }
 }
 
-async function multistand(player) {
-    if (player === players){
+async function split(player) {
+    list[player].split = playerFactory(`${list[player].username}_2`)
+    list[player].split.hand.card1 = list[player].hand.card2
+    list[player].hand.card2 = cards()
+    list[player].split.hand.card2 = cards()
+    list.push(list[player].split)
+    list[player].aces = 0
+    list[player].split.aces = 0
+    if (list[player].hand.card1 === "Ace") list[player].aces += 1
+    if (list[player].hand.card2 === "Ace") list[player].aces += 1
+    if (list[player].split.hand.card1 === "Ace") list[player].split.aces += 1
+    if (list[player].split.hand.card2 === "Ace") list[player].split.aces += 1
+    return await multiask(["s","h", "doubledown"], player, list[player].username)
+}
+
+async function multistand(player, split) {
+    if (player === players && list[player].split === undefined || player === players && list[player].split !== undefined && split === true) {
         write(`Dealer's hand: ${list[0].hand.card1} and ${list[0].hand.card2}`)
         await sleep(1)
         while (list[0].getValue() < 17) {
@@ -317,12 +392,27 @@ async function multistand(player) {
         multiwinChecker()
         replay()
     } else {
-        player += 1
-        return await multiask(["s", "h", "surrender", "doubledown"], player)
+        if (split === undefined && list[player].split === undefined) {
+            player += 1
+            if (list[player].card1 === list[player].card2) {
+                return await multiask(["s", "h", "surrender", "doubledown", "split"], player, list[player].username)
+            } else {
+                return await multiask(["s", "h", "surrender", "doubledown"], player, list[player].username)
+            }
+        } else if (split === undefined && list[player].split !== undefined) {
+            return await multiask(["s", "h", "doubledown"], player, list[player].split.username)
+        } else {
+            player += 1
+            if (list[player].card1 === list[player].card2) {
+                return await multiask(["s", "h", "surrender", "doubledown", "split"], player, list[player].username)
+            } else {
+                return await multiask(["s", "h", "surrender", "doubledown"], player, list[player].username)
+            }
+        }
     }
 }
 
-async function multihit(player){
+async function multihit(player, split){
     while (true) {
         newCard = cards()
         if (cardValue[newCard] === 8 || cardValue[newCard] === 11) {
@@ -330,25 +420,33 @@ async function multihit(player){
         } else {
             write(`You drew a ${newCard}`)
         }
-        list[player].hand.cardsNew += cardValue[newCard]
-        aceCheck(player, newCard)
-
-        write(`You have ${list[player].getValue()} points`) 
-        if (list[player].getValue() > 21 && player === players) {
-            write("Your hand went over 21")
-            write("You bust")
-            write("You lose")
-            write(`Your balance is now ${list[player].balance}`)
-            return await multistand(player)
-        } else if (list[player].getValue() > 21){
-            write("You lose")
-            return await multistand(player)
-        } else if (list[player].doubleDown = true) {
-            list[player].bet *= 2
-            return await multistand(player)
+        if (split === true) {
+            list[player].split.hand.cardsNew += cardValue[newCard]
+            aceCheck(player, newCard, true)
+            if (list[player].split.getValue() > 21) {
+                write("Your hand went over 21")
+                return await multistand(player, true)
+            } else if (list[player].split.doubleDown === true) {
+                return await multistand(player, true)
+            } else {
+                write(`You have ${list[player].split.getValue()} points`) 
+                return await multiask(["s","h", "doubledown"], player, list[player].split.username)
+            }
         } else {
-            return await multiask(["s","h"], player)
+            list[player].hand.cardsNew += cardValue[newCard]
+            aceCheck(player, newCard)
+            write(`You have ${list[player].getValue()} points`) 
+            if (list[player].getValue() > 21){
+                write("You lose")
+                return await multistand(player)
+            } else if (list[player].doubleDown === true) {
+                return await multistand(player)
+            } else {
+                return await multiask(["s","h"], player, list[player].username)
+            }
         }
+
+        
     }
 }
 
@@ -465,7 +563,11 @@ async function multistart() {
         multiwinChecker()
     }
 
-    return await multiask(["s","h", "surrender", "doubledown"], 1)
+    if (list[1].card1 === list[1].card2) {
+        return await multiask(["s", "h", "surrender", "doubledown", "split"], 1, list[1].username)
+    } else {
+        return await multiask(["s", "h", "surrender", "doubledown"], 1, list[1].username)
+    }
 }
 
 
