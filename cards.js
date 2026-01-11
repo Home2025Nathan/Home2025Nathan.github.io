@@ -25,6 +25,7 @@ let a
 let players
 let list = []
 let dv
+let dHand
 let playbtn
 let beginning = true
 let dl = {
@@ -276,35 +277,33 @@ async function assignPlayer(){
 }
 
 function check(player, name, hand) {
-    if (dHand > 21) {
-        if (hand <= 21) {
-            write(`${name} wins`)
-            player.balance += player.bet  
-        }
+    if (dHand > 21 && hand <= 21) {
+        write(`${name}'s hand wins`)
+        player.balance += player.bet  
+        write(`${player.username}, your balance is now ${player.balance}`)
     } else if (dHand >= 17) {
         if (hand > dHand) {
-            write(`${name} wins`)
+            write(`${name}'s handwins`)
             player.balance += player.bet  
         } else if (hand < dHand) {
-            write(`${name} loses`)
-            player.balance += player.bet
+            write(`${name}'s hand loses`)
+            player.balance -= player.bet
         } else {
-            write(`${name} ties`)
+            write(`${name}'s hand ties`)
         }
-    }
-    write(`${player.username}, your balance is now ${hand}`)
+        write(`${player.username}, your balance is now ${player.balance}`)
+    } 
+    
 }
 
 function multiwinChecker(){
-    let dHand = list[0].getValue()
+    dHand = list[0].getValue()
+    write(`The Dealer has ${dHand} points`)
     for (let i = 1; i <= players; i++) {
         if (list[i].getValue() <= 21 && list[i].surrender === false || list[i].split.getValue() <= 21 && list[i].surrender === false) {
-            if (dHand > 21) {
-                write(`The dealer has ${dHand} points`)
+            if (list[i].split === undefined) {
                 check(list[i], list[i].username, list[i].getValue())
-                check(list[i], list[i].split.username, list[i].split.getValue())
-            } else if (dHand >= 17) {
-                write(`The Dealer has ${dHand} points`)
+            } else {
                 check(list[i], list[i].username, list[i].getValue())
                 check(list[i], list[i].split.username, list[i].split.getValue())
             }
@@ -312,7 +311,7 @@ function multiwinChecker(){
             if (list[i].surrender === true) {
                 write(`Player${i} already surrendered and lost`)
             } else (write(`Player${i} already busted`))
-        }
+    }
     }
 }
 
@@ -333,13 +332,17 @@ async function dDown(player, name) {
 async function split(player) {
     list[player].split = playerFactory(`${list[player].username}_2`)
     list[player].split.hand.card1 = list[player].hand.card2
-    list[player].hand.card2 = undefined
-    list[player].split.hand.card2 = undefined
+    list[player].hand.card2 = 0
+    list[player].split.hand.card2 = 0
     list[player].aces = 0
     list[player].split.aces = 0
     if (list[player].hand.card1 === "Ace") list[player].aces += 1
     if (list[player].split.hand.card1 === "Ace") list[player].split.aces += 1
-    return await multiask(["s","h", "doubledown"], player, list[player].username)
+    if (list[player].username.includes("_2")) {
+        return await multihit(player, true)
+    } else {
+        return await multihit(player)
+    }
 }
 
 async function multistand(player, split) {
@@ -356,9 +359,7 @@ async function multistand(player, split) {
                 await sleep(1)
             }
             list[0].hand.cardsNew += cardValue[newCard]
-                
             aceCheck(0, newCard)
-
             if (list[0].getValue() === 21) {
                 await sleep(1)
                 write(`The Dealer has ${list[0].getValue()} points`)
@@ -379,7 +380,7 @@ async function multistand(player, split) {
                 return await multiask(["s", "h", "surrender", "doubledown"], player, list[player].username)
             }
         } else if (split === undefined && list[player].split !== undefined) {
-            return await multiask(["s", "h", "doubledown"], player, list[player].split.username)
+            return await multihit(player, true)
         } else {
             player += 1
             if (list[player].hand.card1 === list[player].hand.card2) {
@@ -391,51 +392,40 @@ async function multistand(player, split) {
     }
 }
 
-async function multihit(player, split){
-    while (true) {
-        newCard = cards()
-        if (cardValue[newCard] === 8 || cardValue[newCard] === 11) {
-            write(`You drew an ${newCard}`)
-        } else {
-            write(`You drew a ${newCard}`)
-        }
-        if (split === true) {
-            if (list[player].split.hand.card2 === undefined) {
-                list[player].split.hand.card2 = cardValue[newCard]
-            } else {
-                list[player].split.hand.cardsNew += cardValue[newCard]
-            }
-            aceCheck(player, newCard, true)
-            if (list[player].split.getValue() > 21) {
-                write("Your hand went over 21")
-                return await multistand(player, true)
-            } else if (list[player].split.doubleDown === true) {
-                return await multistand(player, true)
-            } else {
-                write(`You have ${list[player].split.getValue()} points`) 
-                return await multiask(["s","h", "doubledown"], player, list[player].split.username)
-            }
-        } else {
-            if (list[player].split.hand.card2 === undefined) {
-                list[player].hand.card2 += cardValue[newCard]
-            } else {
-                list[player].hand.cardsNew += cardValue[newCard]
-            }
-            list[player].hand.cardsNew += cardValue[newCard]
-            aceCheck(player, newCard)
-            write(`You have ${list[player].getValue()} points`) 
-            if (list[player].getValue() > 21){
-                write("You lose")
-                return await multistand(player)
-            } else if (list[player].doubleDown === true) {
-                return await multistand(player)
-            } else {
-                return await multiask(["s","h"], player, list[player].username)
-            }
-        }
-
-        
+async function hitCheck(player, user, split) {
+    let args
+    if (cardValue[newCard] === 8 || cardValue[newCard] === 11) {
+        write(`${user.username}, you drew an ${newCard}`)
+    } else {
+        write(`${user.username}, you drew a ${newCard}`)
     }
+    if (user.hand.card2 === 0) {
+        user.hand.card2 = cardValue[newCard]
+        args = [["s","h", "doubledown"], player, user.username]
+    } else {
+        user.hand.cardsNew += cardValue[newCard]
+        args = [["s","h"], player, user.username]
+    }
+    aceCheck(player, newCard, true)
+    if (user.getValue() > 21) {
+        write("Your hand went over 21")
+        return await multistand(player, split)
+    } else if (user.doubleDown === true) {
+        write(`You have ${user.getValue()} points`) 
+        return await multistand(player, split)
+    } else {
+        write(`You have ${user.getValue()} points`) 
+        return await multiask(...args)
+    }
+}
+
+async function multihit(player, split){
+    newCard = cards()
+    if (split === true) {
+        hitCheck(player, list[player].split, true)
+    } else {
+        hitCheck(player, list[player], undefined)
+    } 
 }
 
 function replay(){
@@ -473,6 +463,9 @@ function multiset_up() {
     output.textContent = ""
     output.innerHTML = ""
     for (let i = 0; i <= players; i++) {
+        list[i].surrender = false
+        list[i].doubleDown = false
+        list[i].split = undefined
         list[i].hand.card1 = cards()
         list[i].hand.card2 = cards()
         list[i].aces = 0
