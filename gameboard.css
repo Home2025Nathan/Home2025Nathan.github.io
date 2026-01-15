@@ -87,12 +87,8 @@ button {
     font-size: 25px;  
 	margin-left: 0.38vw;
 	margin-right: 0.38vw;
+	z-index: 1;
 }	
-
-#board {
-	display: flex;
-	justify-content: center;
-}
 
 #grid {
 	position: relative;
@@ -100,6 +96,19 @@ button {
     grid-template-columns: repeat(7, 61.5px);
     grid-template-rows: repeat(6, 61.5px);
 	z-index: 1;
+}
+
+#board {
+	display: flex;
+	justify-content: center;
+}
+
+#drop-grid {
+	position: absolute;
+	display: grid;
+    grid-template-columns: repeat(7, 61.5px);
+    grid-template-rows: repeat(7, 61.5px);
+	z-index: 0;
 }
 
 #dLoad {
@@ -115,7 +124,7 @@ button {
 	height: 381px;
 	margin-left: -6.7px;
 	margin-top: -6px;
-	z-index: 0;
+	z-index: 1;
 }
 
 #game {
@@ -142,14 +151,29 @@ button {
 }
 
 .cell { 
-    width: 55px;
-    height: 55px;
+    width: 61.5px;
+    height: 61.5px;
     border-radius: 50%;
     background-color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+	z-index: 0;
 }
+
+.cell.drop {
+	--drop-rows: 0;
+	animation: drop 0.4s ease-out forwards;
+  }
+  
+  @keyframes drop {
+	from {
+	  transform: translateY(calc(var(--drop-rows) * -100%));
+	  opacity: 0;
+	}
+	to {
+	  transform: translateY(0);
+	  opacity: 1;
+	}
+  }
+  
 
 .cell.yellow {
 	background-color: yellow;

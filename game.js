@@ -20,6 +20,7 @@ const output = document.getElementById("box")
 const game_div = document.getElementById("game")
 const game_btn = document.getElementById("start-btn")
 const grid = document.getElementById("grid")
+const columnBtn = document.getElementsByClassName("column-btn")
 const count = document.createElement("div")
 
 function write(msg, col){
@@ -78,6 +79,12 @@ function board_print() {
 	if (p === "x") {
 		cell.classList.add("red")
 		sCell.classList.add("red")
+		cell.appendChild(sCell)
+		cell.style.gridColumnStart = col + 1;
+		cell.style.gridRowStart = 1; // top of animation grid
+
+
+
 		cell.style.gridRowStart = row + 1
 		cell.style.gridColumnStart = pillar + 1
 		cell.dataset.row = row
@@ -225,17 +232,19 @@ function start_game(){
 	count.textContent = `P${pc}`
 	count.className = "count red"
 	output.appendChild(count)
-    game_div.innerHTML = ""
-    for (let c = 0; c < 7; c++) {
+	if (document.querySelector(".column-btn")) {
+		// remove all old buttons, not just the first
+		document.querySelectorAll(".column-btn").forEach(btn => btn.remove());
+	}
+	
+	for (let c = 0; c < 7; c++) {
 		let btn = document.createElement("button");
 		btn.textContent = (c + 1).toString();
 		btn.className = "column-btn";
-		btn.addEventListener("click", (ev) => {
-			turns(c)
-		});
+		btn.addEventListener("click", () => turns(c));
 		game_div.appendChild(btn);
-	}	
-}
+	}
+	
 window.addEventListener("keydown", function(event) {
 	event.target.blur()
 	let key = event.key 
@@ -243,5 +252,6 @@ window.addEventListener("keydown", function(event) {
 		turns(key - 1)
 	}
 })
+}
 
 game_btn.addEventListener("click", start_game);	
