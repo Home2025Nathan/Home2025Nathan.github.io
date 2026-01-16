@@ -108,7 +108,8 @@ button {
 	display: grid;
     grid-template-columns: repeat(7, 61.5px);
     grid-template-rows: repeat(7, 61.5px);
-	z-index: 0;
+	pointer-events: none;
+	z-index: 10;
 }
 
 #dLoad {
@@ -129,7 +130,8 @@ button {
 
 #game {
     display: flex;
-    margin: 10px;
+	position: relative;
+    margin: 8px;
     justify-content: center;
 }
 
@@ -155,10 +157,13 @@ button {
     height: 61.5px;
     border-radius: 50%;
     background-color: white;
-	z-index: 0;
+	z-index: -1;
+	position: relative;
+	
 }
 
 .cell.drop {
+	z-index: -1;
 	--drop-rows: 0;
 	animation: drop 0.4s ease-out forwards;
   }
@@ -171,7 +176,8 @@ button {
 	to {
 	  transform: translateY(0);
 	  opacity: 1;
-	}
+	};
+	
   }
   
 
@@ -184,6 +190,8 @@ button {
 }
 
 .sCell {
+	margin-top: 8%;
+	margin-left: 8%;
     width: 45px;
     height: 45px;
     border-radius: 50%;

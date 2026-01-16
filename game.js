@@ -20,6 +20,7 @@ const output = document.getElementById("box")
 const game_div = document.getElementById("game")
 const game_btn = document.getElementById("start-btn")
 const grid = document.getElementById("grid")
+const dropGrid = document.getElementById("drop-grid")
 const columnBtn = document.getElementsByClassName("column-btn")
 const count = document.createElement("div")
 
@@ -79,28 +80,27 @@ function board_print() {
 	if (p === "x") {
 		cell.classList.add("red")
 		sCell.classList.add("red")
-		cell.appendChild(sCell)
-		cell.style.gridColumnStart = col + 1;
-		cell.style.gridRowStart = 1; // top of animation grid
-
-
-
-		cell.style.gridRowStart = row + 1
-		cell.style.gridColumnStart = pillar + 1
-		cell.dataset.row = row
-		cell.dataset.col = pillar
-		grid.appendChild(cell)
-		cell.appendChild(sCell)
 	} else if (p === "o") {
 		cell.classList.add("yellow")
 		sCell.classList.add("yellow")
-		cell.style.gridRowStart = row + 1
-		cell.style.gridColumnStart = pillar + 1
+	}
+		cell.appendChild(sCell)
 		cell.dataset.row = row
 		cell.dataset.col = pillar
-		grid.appendChild(cell)
-		cell.appendChild(sCell)
-	}
+		cell.style.gridColumnStart = pillar + 1;
+		cell.style.gridRowStart = 1; // top of animation grid
+		dropGrid.appendChild(cell)
+		let targetRow = row;
+		cell.style.setProperty("--drop-rows", targetRow);
+		cell.classList.add("drop");
+
+		cell.addEventListener("animationend", () => {
+			cell.classList.remove("drop");
+			cell.style.transform = "";
+			cell.style.opacity = "";
+			cell.style.gridRowStart = targetRow + 1;
+			grid.appendChild(cell);
+		  });
 	if (game_over) { 
         write(`Player ${num} wins`)
     } else if (full){
@@ -226,7 +226,6 @@ function start_game(){
 	play_count = false
 	full = false
     game_over = false
-    board_print("1")
 	count.classList.add("count")
 	let pc = "1"
 	count.textContent = `P${pc}`
