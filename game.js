@@ -1,3 +1,7 @@
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms*1000));
+}
+
 let play_count = false
 let num = null
 let p 
@@ -91,8 +95,13 @@ function board_print() {
 		cell.style.gridRowStart = 1; // top of animation grid
 		dropGrid.appendChild(cell)
 		let targetRow = row;
-		cell.style.setProperty("--drop-rows", targetRow);
 		cell.classList.add("drop");
+		cell.style.setProperty("--drop-rows", targetRow);
+		console.log(
+			"drop-rows:",
+			getComputedStyle(cell).getPropertyValue("--drop-rows")
+		);
+		  
 
 		cell.addEventListener("animationend", () => {
 			cell.classList.remove("drop");
