@@ -76,7 +76,7 @@ function toggle(cells) {
 	}, 3000)	
 }
 
-function board_print() {
+async function board_print() {
 	let cell = document.createElement("div")
 	let sCell = document.createElement("div")
 	cell.classList.add("cell");
@@ -88,28 +88,30 @@ function board_print() {
 		cell.classList.add("yellow")
 		sCell.classList.add("yellow")
 	}
-		cell.appendChild(sCell)
-		cell.dataset.row = row
-		cell.dataset.col = pillar
-		cell.style.gridColumnStart = pillar + 1;
-		cell.style.gridRowStart = 1; // top of animation grid
-		dropGrid.appendChild(cell)
-		let targetRow = row;
-		cell.classList.add("drop");
-		cell.style.setProperty("--drop-rows", targetRow);
-		console.log(
-			"drop-rows:",
-			getComputedStyle(cell).getPropertyValue("--drop-rows")
-		);
-		  
+	cell.appendChild(sCell)
+	cell.dataset.row = row
+	cell.dataset.col = pillar
+	cell.style.gridColumnStart = pillar + 1;
+	cell.style.gridRowStart = 1; // top of animation grid
+	dropGrid.appendChild(cell)
+	let targetRow = row;
+	cell.classList.add("drop");
+	cell.style.setProperty("--drop-rows", targetRow);
+	console.log(
+		"drop-rows:",
+		getComputedStyle(cell).getPropertyValue("--drop-rows")
+	);
+		
 
-		cell.addEventListener("animationend", () => {
-			cell.classList.remove("drop");
-			cell.style.transform = "";
-			cell.style.opacity = "";
-			cell.style.gridRowStart = targetRow + 1;
-			grid.appendChild(cell);
-		  });
+	cell.addEventListener("animationend", () => {
+		cell.classList.remove("drop");
+		cell.style.transform = "";
+		cell.style.opacity = "";
+		cell.style.gridRowStart = targetRow + 1;
+		grid.appendChild(cell);
+		});
+	
+	await sleep(3.5)
 	if (game_over) { 
         write(`Player ${num} wins`)
     } else if (full){
@@ -119,7 +121,7 @@ function board_print() {
     }		
 }
 
-function turns(column) {
+async function turns(column) {
     if (game_over || full) {
         return
     }
@@ -142,7 +144,7 @@ function turns(column) {
                 full = true
             }
             (play_count) ? play_count = false : play_count = true
-            board_print(num)
+            await board_print(num)
             break
         }
     }

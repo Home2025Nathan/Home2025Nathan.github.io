@@ -158,6 +158,10 @@ async function ask(allowed, player, name) {
         } else if (allowed.includes("split") && choice === "split") {
             write(choice)
             await sleep(1)
+            if (list[player].balance < list[player].bet * 2) {
+                write("Insufficient funds to double down")
+                continue
+            }
             return await split(player)
         } else {
             write("invalid input, try again")
@@ -178,8 +182,8 @@ async function bet() {
 
 }
 
-function aceCheck(player, item, split) {
-    if (item === "Ace") {
+function aceCheck(player, card, split) {
+    if (card === "Ace") {
         if (split === true) {
             list[player].split.aces += 1
             return
@@ -300,18 +304,18 @@ function winChecker(){
     dHand = list[0].getValue()
     write(`The Dealer has ${dHand} points`)
     for (let i = 1; i <= players; i++) {
-        if (list[i].getValue() <= 21 && list[i].surrender === false || list[i].split.getValue() <= 21 && list[i].surrender === false) {
-            if (list[i].split === undefined) {
+        if (list[i].split === undefined) {
+            if (list[i].getValue() <= 21 && list[i].surrender === false) {
                 check(list[i], list[i].username, list[i].getValue())
-            } else {
-                check(list[i], list[i].username, list[i].getValue())
-                check(list[i], list[i].split.username, list[i].split.getValue())
-            }
-        } else {
-            if (list[i].surrender === true) {
+            } else if (list[i].surrender === true) {
                 write(`Player${i} already surrendered and lost`)
             } else (write(`Player${i} already busted`))
-    }
+        } else {
+            if (list[i].getValue() <= 21 || list[i].split.getValue() <= 21) {
+                check(list[i], list[i].username, list[i].getValue())
+                check(list[i], list[i].split.username, list[i].split.getValue())
+            } else (write(`Player${i} already busted`))
+        }
     }
 }
 
@@ -356,8 +360,8 @@ async function stand(player, split) {
                 write(`The dealer draws a ${newCard}`)
                 await sleep(1)
             }
+            aceCheck(0, newCard, false)
             list[0].hand.cardsNew += cardValue[newCard]
-            aceCheck(0, newCard)
             if (list[0].getValue() === 21) {
                 await sleep(1)
                 write(`The Dealer has ${list[0].getValue()} points`)
