@@ -11,6 +11,7 @@ let full = false
 let cells
 let row 
 let pillar
+let newGame = false
 let board = [
     [" ", " ", " ", " ", " ", " ", " "],
     [" ", " ", " ", " ", " ", " ", " "],
@@ -28,10 +29,19 @@ const dropGrid = document.getElementById("drop-grid")
 const columnBtn = document.getElementsByClassName("column-btn")
 const count = document.createElement("div")
 
+function keypad(event) {
+	event.target.blur()
+	let key = event.key 
+	if (!isNaN(key)) {
+		turns(key - 1)
+	}
+}
+
 function write(msg, col){
 	count.className = "count"
 	if (game_over){
 		count.classList.add("game_over")
+		
 		count.textContent = msg 
 		for (let i = 0; i < 6; i++) {
 			for (let n = 0; n < 7; n++) {
@@ -46,7 +56,12 @@ function write(msg, col){
 		} else if (p === "o") {
 			cells = document.querySelectorAll(".cell.yellow.win")
 		}
-		toggle(cells)
+		setTimeout(() => {
+			cells.forEach(cell => cell.classList.remove("win"));
+		}, 3000)	
+
+		
+
 	} else if (full) {
 		count.classList.add("full")
 		count.textContent = msg 
@@ -69,7 +84,7 @@ function toggle(cells) {
 				win.style.display = 'none';
 			}
 		})
-	}, 500)
+	}, 400)
 	setTimeout(() => {
 		clearInterval(blink)
 		cells.forEach(win => win.style.display = 'flex');
@@ -97,10 +112,6 @@ async function board_print() {
 	let targetRow = row;
 	cell.classList.add("drop");
 	cell.style.setProperty("--drop-rows", targetRow);
-	console.log(
-		"drop-rows:",
-		getComputedStyle(cell).getPropertyValue("--drop-rows")
-	);
 		
 
 	cell.addEventListener("animationend", () => {
@@ -108,10 +119,14 @@ async function board_print() {
 		cell.style.transform = "";
 		cell.style.opacity = "";
 		cell.style.gridRowStart = targetRow + 1;
+		(newGame === false) ? grid.appendChild(cell) : newGame = true
 		grid.appendChild(cell);
 		});
 	
-	await sleep(3.5)
+	await new Promise(resolve => {
+		cell.addEventListener("animationend", resolve, { once: true });
+		});
+	await sleep(2)
 	if (game_over) { 
         write(`Player ${num} wins`)
     } else if (full){
@@ -231,6 +246,7 @@ function start_game(){
 	grid.innerHTML = ""
 	grid.appendChild(img)
 	game_btn.addEventListener("click", () => {
+		newGame = true
 		grid.innerHTML = "";
 		grid.appendChild(img)
     });
@@ -254,14 +270,9 @@ function start_game(){
 		btn.addEventListener("click", () => turns(c));
 		game_div.appendChild(btn);
 	}
-	
-window.addEventListener("keydown", function(event) {
-	event.target.blur()
-	let key = event.key 
-	if (!isNaN(key)) {
-		turns(key - 1)
-	}
-})
+window.removeEventListener("keydown", keypad)
+
+window.addEventListener("keydown", keypad)
 }
 
 game_btn.addEventListener("click", start_game);	
