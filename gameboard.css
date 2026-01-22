@@ -78,17 +78,50 @@ button {
 	margin-left: 20%;	
 }
 
+
+#game {
+	top: -100%;
+	justify-content: center;
+	
+	display: grid;
+  	grid-template-columns: repeat(7, 61.5px);
+  	grid-template-columns: repeat(7, 61.5px);
+
+}
+
 .column-btn {
-    padding: 17px;
-    padding-top: 8px;
-    padding-bottom: 15px;
-	margin-bottom: 3px;
+	margin-left: 11%;
+	grid-row: 1;
+	margin-top: 10px;
+    width: 75%;
+	height: 50px;
     font-family: Georgia, serif;
     font-size: 25px;  
-	margin-left: 0.38vw;
-	margin-right: 0.38vw;
 	z-index: 0;
 }	
+
+.hover-btn {
+	visibility: hidden;
+	grid-row: 2;
+	display: flex;
+	width: 100%;
+	height: 1700%;
+	margin-top: 20px;
+    font-family: Georgia, serif;
+    font-size: 25px;  
+	z-index: 10;
+}
+
+#drop-grid {
+	left: 50%;
+	transform: translateX(-50%);
+	position: absolute;
+	display: grid;
+    grid-template-columns: repeat(7, 61.5px);
+    grid-template-rows: repeat(7, 61.5px);
+	pointer-events: none;
+	z-index: 1;
+}
 
 #grid {
 	position: relative;
@@ -102,15 +135,6 @@ button {
 	position: relative;
 	display: flex;
 	justify-content: center;
-}
-
-#drop-grid {
-	position: absolute;
-	display: grid;
-    grid-template-columns: repeat(7, 61.5px);
-    grid-template-rows: repeat(7, 61.5px);
-	pointer-events: none;
-	z-index: 1;
 }
 
 #dLoad {
@@ -129,12 +153,6 @@ button {
 	z-index: 1;
 }
 
-#game {
-    display: flex;
-	position: relative;
-    margin: 8px;
-    justify-content: center;
-}
 
 .start-btn {
     display: block; 

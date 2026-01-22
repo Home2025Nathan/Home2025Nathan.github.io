@@ -11,7 +11,7 @@ let full = false
 let cells
 let row 
 let pillar
-let newGame = false
+let dropping = false
 let board = [
     [" ", " ", " ", " ", " ", " ", " "],
     [" ", " ", " ", " ", " ", " ", " "],
@@ -28,6 +28,8 @@ const grid = document.getElementById("grid")
 const dropGrid = document.getElementById("drop-grid")
 const columnBtn = document.getElementsByClassName("column-btn")
 const count = document.createElement("div")
+const img = document.createElement("img");
+
 
 function keypad(event) {
 	event.target.blur()
@@ -93,6 +95,7 @@ function toggle(cells) {
 
 async function board_print() {
 	let cell = document.createElement("div")
+	anim = getComputedStyle(cell).animationPlayState 
 	let sCell = document.createElement("div")
 	cell.classList.add("cell");
 	sCell.classList.add("sCell")
@@ -119,13 +122,10 @@ async function board_print() {
 		cell.style.transform = "";
 		cell.style.opacity = "";
 		cell.style.gridRowStart = targetRow + 1;
-		(newGame === false) ? grid.appendChild(cell) : newGame = true
-		grid.appendChild(cell);
+		grid.appendChild(cell) 
 		});
 	
-	await new Promise(resolve => {
-		cell.addEventListener("animationend", resolve, { once: true });
-		});
+	
 	await sleep(2)
 	if (game_over) { 
         write(`Player ${num} wins`)
@@ -243,13 +243,6 @@ function start_game(){
 	const img = document.createElement("img");
 	img.src = "https://cgi.csc.liv.ac.uk/~trp/Teaching/Entries/2013/10/21_COMP327_-_Practical_Assignment_1_2013_files/FIAL_Board.png"
 	img.classList.add("img")
-	grid.innerHTML = ""
-	grid.appendChild(img)
-	game_btn.addEventListener("click", () => {
-		newGame = true
-		grid.innerHTML = "";
-		grid.appendChild(img)
-    });
 	play_count = false
 	full = false
     game_over = false
@@ -261,18 +254,32 @@ function start_game(){
 	if (document.querySelector(".column-btn")) {
 		// remove all old buttons, not just the first
 		document.querySelectorAll(".column-btn").forEach(btn => btn.remove());
+		document.querySelectorAll(".hover-btn").forEach(btn => btn.remove());
 	}
 	
 	for (let c = 0; c < 7; c++) {
 		let btn = document.createElement("button");
+		let hoverBtn = document.createElement("button");
 		btn.textContent = (c + 1).toString();
 		btn.className = "column-btn";
+		hoverBtn.className = "hover-btn"
 		btn.addEventListener("click", () => turns(c));
+		hoverBtn.addEventListener("click", () => turns(c))
 		game_div.appendChild(btn);
+		game_div.appendChild(hoverBtn)
 	}
 window.removeEventListener("keydown", keypad)
 
 window.addEventListener("keydown", keypad)
 }
 
-game_btn.addEventListener("click", start_game);	
+game_btn.addEventListener("click", () => {
+	if (!document.querySelector(".cell.drop")) {
+		grid.innerHTML = "";
+		img.src = "https://cgi.csc.liv.ac.uk/~trp/Teaching/Entries/2013/10/21_COMP327_-_Practical_Assignment_1_2013_files/FIAL_Board.png"
+		img.classList.add("img")
+		grid.appendChild(img)
+		start_game();
+	}
+	
+});	
