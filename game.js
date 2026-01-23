@@ -39,12 +39,12 @@ function keypad(event) {
 	}
 }
 
-function write(msg, col){
+async function write(msg, col){
 	count.className = "count"
 	if (game_over){
 		count.classList.add("game_over")
-		
 		count.textContent = msg 
+		await sleep(1)
 		for (let i = 0; i < 6; i++) {
 			for (let n = 0; n < 7; n++) {
 				if (board[i][n] === "P1" || board[i][n] === "P2") {
@@ -126,13 +126,13 @@ async function board_print() {
 		});
 	
 	
-	await sleep(2)
+
 	if (game_over) { 
-        write(`Player ${num} wins`)
+        await write(`Player ${num} wins`)
     } else if (full){
-		write("Game Over!!")
+		await write("Game Over!!")
 	} else {
-        write(num, col)
+        await write(num, col)
     }		
 }
 
