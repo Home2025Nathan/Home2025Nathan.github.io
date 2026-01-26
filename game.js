@@ -2,6 +2,8 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms*1000));
 }
 
+
+
 let play_count = false
 let num = null
 let p 
@@ -29,6 +31,13 @@ const dropGrid = document.getElementById("drop-grid")
 const columnBtn = document.getElementsByClassName("column-btn")
 const count = document.createElement("div")
 const img = document.createElement("img");
+const hover_cell = document.createElement("div")
+const hover_sCell = document.createElement("div")
+
+
+hover_cell.classList.add("cell");
+hover_sCell.classList.add("sCell")
+hover_cell.appendChild(hover_sCell)
 
 
 function keypad(event) {
@@ -95,7 +104,6 @@ function toggle(cells) {
 
 async function board_print() {
 	let cell = document.createElement("div")
-	anim = getComputedStyle(cell).animationPlayState 
 	let sCell = document.createElement("div")
 	cell.classList.add("cell");
 	sCell.classList.add("sCell")
@@ -110,7 +118,7 @@ async function board_print() {
 	cell.dataset.row = row
 	cell.dataset.col = pillar
 	cell.style.gridColumnStart = pillar + 1;
-	cell.style.gridRowStart = 1; // top of animation grid
+	cell.style.gridRowStart = 1; 
 	dropGrid.appendChild(cell)
 	let targetRow = row;
 	cell.classList.add("drop");
@@ -122,6 +130,7 @@ async function board_print() {
 		cell.style.transform = "";
 		cell.style.opacity = "";
 		cell.style.gridRowStart = targetRow + 1;
+	
 		grid.appendChild(cell) 
 		});
 	
@@ -252,9 +261,9 @@ function start_game(){
 	count.className = "count red"
 	output.appendChild(count)
 	if (document.querySelector(".column-btn")) {
-		// remove all old buttons, not just the first
 		document.querySelectorAll(".column-btn").forEach(btn => btn.remove());
 		document.querySelectorAll(".hover-btn").forEach(btn => btn.remove());
+
 	}
 	
 	for (let c = 0; c < 7; c++) {
@@ -263,6 +272,43 @@ function start_game(){
 		btn.textContent = (c + 1).toString();
 		btn.className = "column-btn";
 		hoverBtn.className = "hover-btn"
+		hoverBtn.dataset.col = c + 1
+		hoverBtn.addEventListener("mouseenter", () => {
+			if (col === "red") {
+				hoverBtn.className = "hover-btn yellow"
+			} else {
+				hoverBtn.className = "hover-btn red"
+			}
+			hoverBtn.style.opacity = "0.1"
+		})
+
+		hoverBtn.addEventListener("mouseenter", () => {
+			hoverBtn.className = "hover-btn"
+			hoverBtn.style.opacity = "1"
+		})
+		for (let i = 0; i < 7; i++) {
+			let square = document.createElement("div");	
+			square.className = "square"
+			square.dataset.row = i + 1
+			hoverBtn.appendChild(square)
+			square.addEventListener("mouseleave", () => {
+				if (col === "red") {
+					hover_cell.className = "cell yellow"
+					hover_sCell.className = "sCell yellow"
+				} else {
+					hover_cell.className = "cell red"
+					hover_sCell.className = "sCell red"
+				}
+				hover_cell.style.gridRowStart = square.dataset.row 
+				hover_cell.style.gridColumnStart = hoverBtn.dataset.col 
+				hover_cell.style.opacity = "0.7"
+				hover_cell.style.zIndex = "-1"
+				grid.appendChild(hover_cell)
+			})
+			square.addEventListener("mouseleave", () => {
+				grid.removeChild(hover_cell)
+			});
+		}
 		btn.addEventListener("click", () => turns(c));
 		hoverBtn.addEventListener("click", () => turns(c))
 		game_div.appendChild(btn);
@@ -283,3 +329,4 @@ game_btn.addEventListener("click", () => {
 	}
 	
 });	
+

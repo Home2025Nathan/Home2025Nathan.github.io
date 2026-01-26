@@ -42,6 +42,7 @@ button {
 
 .count {
 	position: absolute;
+	display: block;
 	height: 100px;
 	width: 100px;
 	text-align: center;
@@ -50,6 +51,7 @@ button {
 	cursor: pointer;
 	border-radius: 50%;
 	border: 2px solid black;
+	z-index: 11;
 }
 
 .count.yellow {
@@ -83,9 +85,10 @@ button {
 	justify-content: center;
 	position: relative;
 	display: grid;
+	height: 52%;
   	grid-template-columns: repeat(7, 61.5px);
-	grid-template-rows: repeat(3, 40px);
-	height: 400px;
+	grid-template-rows: repeat(6, 61.5px);
+
 
 }
 
@@ -93,7 +96,6 @@ button {
 	display: fixed;
 	margin-left: 11%;
 	grid-row: 1;
-	margin-top: 10px;
 	bottom: 5%;
     width: 75%;
 	height: 50px;
@@ -104,20 +106,31 @@ button {
 
 .hover-btn {
 	opacity: 0;
-	grid-row: 3;
+	grid-row: 2;
 	display: grid;
 	grid-template-columns: repeat(1, 61.5px);
 	grid-template-rows: repeat(6, 61.5px);
 	width: 100%;
-	margin-top: 20px;
-    font-family: Georgia, serif;
-    font-size: 25px;  
+	height: 600%;
 	z-index: 10;
+	border-radius: 5%;
+}
+
+.hover-btn.yellow {
+	background-color: yellow;
+}
+
+.hover-btn.red {
+	background-color: red;
+}
+
+.square {
+	height: 100%;
+	width: 100%;
 }
 
 #drop-grid {
 	left: 50%;
-	top: 5%;
 	grid-row: 1;
 	transform: translateX(-50%);
 	position: absolute;
@@ -137,7 +150,7 @@ button {
 }
 
 #board {
-	grid-row: 3;
+	grid-row: 2;
 	position: absolute;
 	inset: 0;
 	display: flex;
@@ -162,14 +175,15 @@ button {
 
 
 #ui {
-	z-index: 10;
-	display: block;
+	display: flex;
+	position: relative 
 
 }
 
 .start-btn {
     display: block; 
-    margin: 0 auto; 
+    margin-left: 50%;
+	transform: translateX(-50%);
     padding: 40px;
     font-family: Georgia, serif;
     font-size: 25px;
@@ -178,7 +192,8 @@ button {
 
 .startbtn {
 	display: block;
-	margin: 1% auto;
+	margin-left: 50%;
+	transform: translateX(-50%);
 	padding: 20px;
     font-family: Georgia, serif;
     font-size: 22px;
