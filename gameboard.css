@@ -113,7 +113,7 @@ button {
 	width: 100%;
 	height: 600%;
 	z-index: 10;
-	border-radius: 5%;
+	border-radius: 999px;
 }
 
 .hover-btn.yellow {
