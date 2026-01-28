@@ -118,10 +118,12 @@ button {
 
 .hover-btn.yellow {
 	background-color: yellow;
+	opacity: 0.3;
 }
 
 .hover-btn.red {
 	background-color: red;
+	opacity: 0.3;
 }
 
 .square {

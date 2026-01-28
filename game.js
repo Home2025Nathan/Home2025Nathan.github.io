@@ -40,12 +40,21 @@ hover_sCell.classList.add("sCell")
 hover_cell.appendChild(hover_sCell)
 
 
-function keypad(event) {
+async function keypad(event) {
 	event.target.blur()
 	let key = event.key 
-	if (!isNaN(key)) {
-		turns(key - 1)
+	hoverBtn = hoverBtns[key-1]
+	if (col === "red") {
+		hoverBtn.className = "hover-btn yellow"
+	} else {
+		hoverBtn.className = "hover-btn red"
 	}
+	await sleep(0.3)
+	if (!isNaN(key)) {
+		turns(parseInt(key) - 1)
+	}
+		
+	
 }
 
 async function write(msg, col){
@@ -102,11 +111,14 @@ function toggle(cells) {
 	}, 3000)	
 }
 
-async function board_print() {
+async function board_print(num, column) {
 	let cell = document.createElement("div")
 	let sCell = document.createElement("div")
 	cell.classList.add("cell");
 	sCell.classList.add("sCell")
+	hoverBtn = hoverBtns[column]
+	hoverBtn.className = "hover-btn"
+	await sleep(1)
 	if (p === "x") {
 		cell.classList.add("red")
 		sCell.classList.add("red")
@@ -135,7 +147,8 @@ async function board_print() {
 	
 		grid.appendChild(cell) 
 		});
-	
+	sqrOnLeave()
+	sqrOnEnter(column)
 	
 
 	if (game_over) { 
@@ -171,9 +184,7 @@ async function turns(column) {
                 full = true
             }
             (play_count) ? play_count = false : play_count = true
-			hoverOnEnter(undefined, column)
-			sqrOnEnter(undefined, column, row)	
-            await board_print(num)
+            await board_print(num, column)
             break
         }
     }
@@ -246,15 +257,23 @@ function winchecker() {
 const hoverBtns = []
 const squares = []
 
-function sqrOnEnter(e, column, row) {
+function sqrOnEnter(e) {
 	let square
-	if (!e) {
-		let num = column * 6 + row
-		square = squares[num]
+	let column
+	if (typeof e === "number") {
+		column = e
 	} else {
-		square = e.currentTarget
+		column = parseInt(e.currentTarget.parentElement.dataset.col) - 1
 	}
-	const hoverBtn = square.parentElement;
+	for (let i = 5; i >= 0; i--) {
+    if (board[i][column] === " ") {
+        row = i;
+        break;
+    }
+}
+	let num = column * 6 + row 
+	square = squares[num]
+	let hoverBtn = square.parentElement;
 
 	if (col === "red") {
 		hover_cell.className = "cell yellow"
@@ -265,21 +284,24 @@ function sqrOnEnter(e, column, row) {
 	}
 	hover_cell.style.gridRowStart = square.dataset.row 
 	hover_cell.style.gridColumnStart = hoverBtn.dataset.col 
-	hover_cell.style.opacity = "0.7"
+	hover_cell.style.opacity = "0.5"
 	hover_cell.style.zIndex = "-1"
 	grid.appendChild(hover_cell)
 	
 }
 function sqrOnLeave() {
-	if (hover_cell.parentNode) {
-    	hover_cell.remove();
- 	 }
+	if (hover_cell.parentElement === grid) {
+        grid.removeChild(hover_cell)
+    }
 	
 }
-function hoverOnEnter(e, num) {
+function hoverOnEnter(e) {
 	let hoverBtn
-	if (!e) {
-		hoverBtn = hoverBtns[num]
+	console.log(e.currentTarget)
+	if (e.currentTarget.classList.contains("column-btn")) {
+		let num = parseInt(e.currentTarget.textContent)
+		hoverBtn = hoverBtns[num - 1]
+		sqrOnEnter(num - 1)
 	} else {
 		hoverBtn = e.currentTarget
 	}
@@ -288,20 +310,32 @@ function hoverOnEnter(e, num) {
 	} else {
 		hoverBtn.className = "hover-btn red"
 	}
-	hoverBtn.style.opacity = "0.4"
 	
 }
-function hoverOnLeave(e, num) {
+function hoverOnLeave(e) {
 	let hoverBtn = true
-	if (hoverBtn) {
-		if (!e) {
-			hoverBtn = hoverBtns[num]
-		} else {
-			hoverBtn = e.currentTarget
-		}
-		hoverBtn.className = "hover-btn"
-		hoverBtn.style.opacity = "0"
+	if (e.currentTarget.classList.contains("column-btn")) {
+		let num = parseInt(e.currentTarget.textContent)
+		hoverBtn = hoverBtns[num - 1]
+	} else {
+		hoverBtn = e.currentTarget
 	}
+	hoverBtn.className = "hover-btn"	
+	sqrOnLeave()
+	
+}
+
+function click(column) {
+	hoverBtn = hoverBtns[column]
+	if (col === "red") {
+		hoverBtn.className = "hover-btn yellow"
+	} else {
+		hoverBtn.className = "hover-btn red"
+	}
+	sqrOnLeave()
+	sqrOnEnter(column)
+	return turns(column)
+	
 }
 
 
@@ -340,6 +374,8 @@ function start_game(){
 		let hoverBtn = document.createElement("button");
 		btn.textContent = (c + 1).toString();
 		btn.className = "column-btn";
+		btn.addEventListener("mouseenter", hoverOnEnter)
+		btn.addEventListener("mouseleave", hoverOnLeave)
 		hoverBtn.className = "hover-btn"
 		hoverBtn.dataset.col = c + 1
 		hoverBtn.addEventListener("mouseenter", hoverOnEnter)
@@ -354,8 +390,8 @@ function start_game(){
 			square.addEventListener("mouseleave", sqrOnLeave);
 			squares.push(square)
 		}
-		btn.addEventListener("click", () => turns(c));
-		hoverBtn.addEventListener("click", () => turns(c))
+		btn.addEventListener("click", () => click(c));
+		hoverBtn.addEventListener("click", () => click(c))
 		game_div.appendChild(btn);
 		game_div.appendChild(hoverBtn)
 	}
