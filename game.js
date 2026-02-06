@@ -378,9 +378,6 @@ function start_game(){
 		btn.addEventListener("mouseleave", hoverOnLeave)
 		hoverBtn.className = "hover-btn"
 		hoverBtn.dataset.col = c + 1
-		hoverBtn.addEventListener("mouseenter", hoverOnEnter)
-		hoverBtn.addEventListener("mouseleave", hoverOnLeave)
-		hoverBtns.push(hoverBtn)
 		for (let i = 0; i < 6; i++) {
 			let square = document.createElement("div");	
 			square.className = "square"
@@ -411,5 +408,6 @@ game_btn.addEventListener("click", () => {
 	}
 	
 });	
+
 
 hoverBtn = document.querySelectorAll(".hover-btn")
