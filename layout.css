@@ -34,6 +34,13 @@ button {
 	background-color: white;
 	border: 0;
 	border-radius: 12px;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+button:hover {
+  transform: scale(1.07);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  filter: brightness(1.15);
 }
 
 #container {
@@ -106,4 +113,34 @@ button {
 	
 }
 
+.nav-images {
+  gap: 200px;   
+  justify-content: center;
+  text-align: center;
+  align-items: center;           
 
+}
+
+.bj-btn {
+	width: 400px;
+	height: 400px;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.bj-btn:hover {
+  transform: scale(1.07);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  filter: brightness(1.15);
+}
+
+.c4-btn {
+	width: 465.5px;
+	height: 400px;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.c4-btn:hover {
+  transform: scale(1.07);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  filter: brightness(1.15);
+}

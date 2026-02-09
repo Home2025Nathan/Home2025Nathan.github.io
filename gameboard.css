@@ -34,6 +34,13 @@ button {
 	background-color: white;
 	border: 0;
 	border-radius: 12px;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+button:hover {
+  transform: scale(1.07);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  filter: brightness(1.15);
 }
 
 #container {
@@ -52,6 +59,13 @@ button {
 	border-radius: 50%;
 	border: 2px solid black;
 	z-index: 11;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.count:hover {
+  transform: scale(1.07);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  filter: brightness(1.15);
 }
 
 .count.yellow {
@@ -114,16 +128,23 @@ button {
 	height: 600%;
 	z-index: 10;
 	border-radius: 999px;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.hover-btn:hover {
+  transform: scale(1.07);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  filter: brightness(1.15);
 }
 
 .hover-btn.yellow {
 	background-color: yellow;
-	opacity: 0.3;
+	opacity: 0.2;
 }
 
 .hover-btn.red {
 	background-color: red;
-	opacity: 0.3;
+	opacity: 0.2;
 }
 
 .square {
@@ -182,24 +203,23 @@ button {
 
 }
 
-.start-btn {
-    display: block; 
+.startbtn, .start-btn {
+    display: block;
     margin-left: 50%;
-	transform: translateX(-50%);
-    padding: 40px;
-    font-family: Georgia, serif;
-    font-size: 25px;
-}
-
-
-.startbtn {
-	display: block;
-	margin-left: 50%;
-	transform: translateX(-50%);
-	padding: 20px;
+    transform: translateX(-50%);
+    transform-origin: center; 
+    padding: 20px;
     font-family: Georgia, serif;
     font-size: 22px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
+
+.startbtn:hover, .start-btn:hover {
+    transform: translateX(-50%) scale(1.07); /* combine translation + scale */
+    box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+    filter: brightness(1.15);
+}
+
 
 .cell { 
     width: 52px;

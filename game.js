@@ -44,13 +44,8 @@ async function keypad(event) {
 	event.target.blur()
 	let key = event.key 
 	hoverBtn = hoverBtns[key-1]
-	if (col === "red") {
-		hoverBtn.className = "hover-btn yellow"
-	} else {
-		hoverBtn.className = "hover-btn red"
-	}
-	await sleep(0.3)
-	if (!isNaN(key)) {
+	if (!isNaN(key) && key > 0 && key < 8) {
+		document.querySelectorAll(".hover-btn").forEach(btn => btn.className = "hover-btn");
 		turns(parseInt(key) - 1)
 	}
 		
@@ -118,7 +113,6 @@ async function board_print(num, column) {
 	sCell.classList.add("sCell")
 	hoverBtn = hoverBtns[column]
 	hoverBtn.className = "hover-btn"
-	await sleep(1)
 	if (p === "x") {
 		cell.classList.add("red")
 		sCell.classList.add("red")
@@ -378,6 +372,9 @@ function start_game(){
 		btn.addEventListener("mouseleave", hoverOnLeave)
 		hoverBtn.className = "hover-btn"
 		hoverBtn.dataset.col = c + 1
+		hoverBtn.addEventListener("mouseenter", hoverOnEnter)
+		hoverBtn.addEventListener("mouseleave", hoverOnLeave)
+		hoverBtns.push(hoverBtn)
 		for (let i = 0; i < 6; i++) {
 			let square = document.createElement("div");	
 			square.className = "square"
